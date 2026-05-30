@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2026-05-31
+
+### Fixed
+
+- Fixed `--media-only` still exporting slide text — it now correctly implies `--no-text`.
+- Fixed re-running without `--overwrite` silently creating `_02`/`_03` duplicate files — existing files are now skipped.
+- Fixed Windows `.cmd` crash (flash exit) caused by LF line endings — converted to CRLF and added `.gitattributes` to preserve CRLF in the repository.
+- Unified software name to `PPTX 内容提取器` across all entry points (Python source, macOS launcher, Windows launcher).
+
 ## [1.1.2] - 2026-05-30
 
 ### Changed
@@ -94,6 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero external dependencies (Python stdlib only)
 - Support for Python 3.8+
 
+[1.1.3]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.1.3
 [1.1.2]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.1.2
 [1.1.1]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.1.1
 [1.0.5]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.0.5
