@@ -3,6 +3,12 @@
 #  PPTX 元素提取工具 - macOS 独立启动器
 #  双击即可运行，兼容 Intel 和 Apple Silicon Mac
 # ============================================================
+
+# -------- 自修复：解决 macOS 传输后权限丢失问题 --------
+# AirDrop/微信/邮件传输可能剥离 +x 权限并添加隔离标记
+chmod +x "$0" >/dev/null 2>&1 || true
+xattr -d com.apple.quarantine "$0" >/dev/null 2>&1 || true
+
 set -e
 
 VERSION="V1.0.1"
