@@ -1,5 +1,5 @@
 @echo off
-set VERSION=V1.0.2
+set VERSION=V1.0.3
 chcp 65001 >nul
 REM ============================================================
 REM  PPTX 元素提取工具 %VERSION% - Windows 启动器
