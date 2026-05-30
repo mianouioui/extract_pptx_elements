@@ -53,6 +53,11 @@ if [ $# -eq 0 ]; then
     echo ""
     echo "──────────────────────────────────────────"
     read -r -p "请输入 .pptx 文件路径（可拖拽）: " input_args
+    if [ -z "$input_args" ]; then
+        echo "未输入文件路径。"
+        read -r -p "按回车关闭..." _
+        exit 0
+    fi
     eval "set -- $input_args"
 fi
 

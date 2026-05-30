@@ -27,6 +27,11 @@ if "%~1"=="" (
     set /p input_args="请输入 .pptx 文件路径（可拖拽）: "
     REM 简单处理：去掉开头结尾的双引号
     set input_args=%input_args:"=%
+	    if "%input_args%"=="" (
+	        echo 未输入文件路径。
+	        pause
+	        exit /b 0
+	    )
     %0 %input_args%
     goto :end
 )
@@ -35,7 +40,7 @@ set PY_SOURCE=%~dp0extract_pptx_elements.py
 set BINARY=%~dp0dist\extract_pptx_elements.exe
 
 REM 策略1：优先使用 Python 源码
-python3 --version >/dev/null 2>&1
+python3 --version >nul 2>&1
 if %errorlevel% equ 0 (
     echo → 使用 Python 源码运行 ...
     python3 "%PY_SOURCE%" %*
@@ -43,7 +48,7 @@ if %errorlevel% equ 0 (
 )
 
 REM 也尝试 python（不带3）
-python --version >/dev/null 2>&1
+python --version >nul 2>&1
 if %errorlevel% equ 0 (
     echo → 使用 Python 源码运行 ...
     python "%PY_SOURCE%" %*
@@ -63,12 +68,12 @@ echo   请安装 Python 3: https://www.python.org/downloads/
 echo   或在 Windows 上编译: build_windows.bat
 echo.
 echo 按任意键关闭此窗口 ...
-pause >/dev/null
+pause >nul
 exit /b 1
 
 :end
 echo.
 echo 完成！(退出码: %errorlevel%)
 echo 按任意键关闭此窗口 ...
-pause >/dev/null
+pause >nul
 exit /b %errorlevel%
