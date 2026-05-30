@@ -8,9 +8,9 @@ Examples:
   python3 extract_pptx_elements.py --no-text
 
 Output naming:
-  Slide 1 JPG: 图片/001_JPG.jpg
-  Slide 1 MP4: 视频/001_MP4.mp4
-  Second JPG on slide 1: 图片/001_JPG_02.jpg
+  Slide 1 JPG: 图片/presentation_001.jpg
+  Slide 1 MP4: 视频/presentation_001.mp4
+  Second JPG on slide 1: 图片/presentation_001_02.jpg
 """
 
 from __future__ import annotations
@@ -33,7 +33,7 @@ PRESENTATION_NS = "http://schemas.openxmlformats.org/presentationml/2006/main"
 OFFICE_RELS_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 DRAWING_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
 
-VERSION = "1.1.3"
+VERSION = "1.1.4"
 DEFAULT_OUTPUT_DIR_NAME = "pptx_extracted_elements"
 
 IMAGE_EXTS = {
@@ -133,7 +133,6 @@ class Relationship:
 class Resource:
     slide_number: int
     kind: str
-    tag: str
     source_part: str
     target_part: str
     rel_id: str
@@ -301,32 +300,13 @@ def extension_for(part: str) -> str:
     return PurePosixPath(part).suffix.lower()
 
 
-def tag_for(kind: str, part: str) -> str:
-    ext = extension_for(part).lstrip(".").upper()
-    if ext == "JPEG":
-        return "JPG"
-    if kind == "chart":
-        return "CHART"
-    if kind == "chart_style":
-        return "CHARTSTYLE"
-    if kind == "chart_colors":
-        return "CHARTCOLORS"
-    if kind == "diagram":
-        return "DIAGRAM"
-    if kind == "ole":
-        return "OLE"
-    if kind == "unknown":
-        return ext or "FILE"
-    return ext or kind.upper()
-
-
-def output_suffix_for(part: str, tag: str) -> str:
+def output_suffix_for(part: str) -> str:
     ext = extension_for(part)
     if ext == ".jpeg":
         return ".jpg"
     if ext:
         return ext
-    return f".{tag.lower()}"
+    return ".bin"
 
 
 def classify_part(rel_type: str, part: str) -> str | None:
@@ -403,7 +383,6 @@ def collect_slide_resources(
                     Resource(
                         slide_number=slide_number,
                         kind=kind,
-                        tag=tag_for(kind, target_part),
                         source_part=source_part,
                         target_part=target_part,
                         rel_id=rel.rel_id,
@@ -435,17 +414,17 @@ def extract_slide_text(zip_file: zipfile.ZipFile, slide_part: str) -> str:
 
 def unique_output_path(
     output_dir: Path,
+    pptx_stem: str,
     slide_number: int,
-    tag: str,
     suffix: str,
-    counters: dict[tuple[Path, int, str], int],
+    counters: dict[tuple[Path, int], int],
     *,
     overwrite: bool,
 ) -> Path | None:
-    key = (output_dir, slide_number, tag)
+    key = (output_dir, slide_number)
     counters[key] = counters.get(key, 0) + 1
     index = counters[key]
-    stem = f"{slide_number:03d}_{tag}" if index == 1 else f"{slide_number:03d}_{tag}_{index:02d}"
+    stem = f"{pptx_stem}_{slide_number:03d}" if index == 1 else f"{pptx_stem}_{slide_number:03d}_{index:02d}"
     candidate = output_dir / f"{stem}{suffix}"
 
     if overwrite:
@@ -527,7 +506,8 @@ def extract_pptx(
         raise ValueError(f"不是有效的 .pptx/zip 文件：{pptx_path}")
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    counters: dict[tuple[Path, int, str], int] = {}
+    pptx_stem = pptx_path.stem
+    counters: dict[tuple[Path, int], int] = {}
     manifest_rows: list[dict[str, str]] = []
     extracted_count = 0
 
@@ -543,12 +523,12 @@ def extract_pptx(
             )
 
             for resource in resources:
-                suffix = output_suffix_for(resource.target_part, resource.tag)
+                suffix = output_suffix_for(resource.target_part)
                 resource_output_dir = kind_output_dir(output_dir, resource.kind)
                 destination = unique_output_path(
                     resource_output_dir,
+                    pptx_stem,
                     resource.slide_number,
-                    resource.tag,
                     suffix,
                     counters,
                     overwrite=overwrite,
@@ -579,8 +559,8 @@ def extract_pptx(
                 if slide_text:
                     text_path = unique_output_path(
                         kind_output_dir(output_dir, "text"),
+                        pptx_stem,
                         slide_number,
-                        "TXT",
                         ".txt",
                         counters,
                         overwrite=overwrite,

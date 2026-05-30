@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2026-05-31
+
+### Changed
+
+- Output file naming changed from `{slide}_{TAG}.ext` to `{pptx_name}_{slide}.ext` (e.g. `presentation_001.jpg` instead of `001_JPG.jpg`). Removed `tag_for`/`Get-TagFor` helper functions across all three entry points.
+
 ## [1.1.3] - 2026-05-31
 
 ### Fixed
@@ -102,6 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero external dependencies (Python stdlib only)
 - Support for Python 3.8+
 
+[1.1.4]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.1.4
 [1.1.3]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.1.3
 [1.1.2]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.1.2
 [1.1.1]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.1.1

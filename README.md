@@ -21,7 +21,7 @@
 | 幻灯片文本 | 默认导出纯文本，可通过 `--no-text` 关闭 |
 | 清单 | 自动生成 `manifest.csv`，记录输出文件与 PPTX 内部资源路径的对应关系 |
 
-输出文件示例：`图片/001_JPG.jpg`、`视频/002_MP4.mp4`、`图表/003_CHART.xml`。前三位数字对应幻灯片编号；同一页同类型资源重复时，会自动追加 `_02`、`_03` 等序号。
+输出文件示例：`图片/presentation_001.jpg`、`视频/presentation_002.mp4`、`图表/presentation_003.xml`。文件名由 PPT 名称与三位页码组成；同一页同类型资源重复时，会自动追加 `_02`、`_03` 等序号。
 
 ### 运行入口
 
@@ -104,15 +104,15 @@ python3 extract_pptx_elements.py
 ```text
 pptx_extracted_elements/
 ├── 图片/
-│   ├── 001_JPG.jpg
-│   ├── 001_JPG_02.jpg
-│   └── 002_PNG.png
+│   ├── presentation_001.jpg
+│   ├── presentation_001_02.jpg
+│   └── presentation_002.png
 ├── 视频/
-│   └── 002_MP4.mp4
+│   └── presentation_002.mp4
 ├── 图表/
-│   └── 003_CHART.xml
+│   └── presentation_003.xml
 ├── 文本/
-│   └── 003_TXT.txt
+│   └── presentation_003.txt
 └── manifest.csv
 ```
 
@@ -122,11 +122,11 @@ pptx_extracted_elements/
 pptx_extracted_elements/
 ├── presentation1/
 │   ├── 图片/
-│   │   └── 001_JPG.jpg
+│   │   └── presentation1_001.jpg
 │   └── manifest.csv
 └── presentation2/
     ├── 图片/
-    │   └── 001_PNG.png
+    │   └── presentation2_001.png
     └── manifest.csv
 ```
 
@@ -195,7 +195,7 @@ MIT
 | Slide text | Plain text export by default; disable it with `--no-text` |
 | Manifest | Automatically writes `manifest.csv` with source mapping |
 
-Example output names include `图片/001_JPG.jpg`, `视频/002_MP4.mp4`, and `图表/003_CHART.xml`. The three-digit prefix is the slide number. Repeated resources of the same type on the same slide receive suffixes such as `_02` and `_03`.
+Example output names include `图片/presentation_001.jpg`, `视频/presentation_002.mp4`, and `图表/presentation_003.xml`. The filename combines the PPTX name and a three-digit slide number. Repeated resources of the same type on the same slide receive suffixes such as `_02` and `_03`.
 
 ### Runtime Entry Points
 
@@ -278,15 +278,15 @@ By default, the output directory is created next to the PPTX file and named `ppt
 ```text
 pptx_extracted_elements/
 ├── 图片/
-│   ├── 001_JPG.jpg
-│   ├── 001_JPG_02.jpg
-│   └── 002_PNG.png
+│   ├── presentation_001.jpg
+│   ├── presentation_001_02.jpg
+│   └── presentation_002.png
 ├── 视频/
-│   └── 002_MP4.mp4
+│   └── presentation_002.mp4
 ├── 图表/
-│   └── 003_CHART.xml
+│   └── presentation_003.xml
 ├── 文本/
-│   └── 003_TXT.txt
+│   └── presentation_003.txt
 └── manifest.csv
 ```
 
@@ -296,11 +296,11 @@ When processing multiple PPTX files:
 pptx_extracted_elements/
 ├── presentation1/
 │   ├── 图片/
-│   │   └── 001_JPG.jpg
+│   │   └── presentation1_001.jpg
 │   └── manifest.csv
 └── presentation2/
     ├── 图片/
-    │   └── 001_PNG.png
+    │   └── presentation2_001.png
     └── manifest.csv
 ```
 
@@ -369,7 +369,7 @@ MIT
 | Texte des diapositives | Export en texte brut par défaut ; désactivation avec `--no-text` |
 | Manifeste | Génération automatique de `manifest.csv` avec la correspondance des sources |
 
-Exemples de noms de sortie : `图片/001_JPG.jpg`, `视频/002_MP4.mp4` et `图表/003_CHART.xml`. Le préfixe à trois chiffres correspond au numéro de la diapositive. Lorsque plusieurs ressources du même type existent sur une même diapositive, des suffixes comme `_02` et `_03` sont ajoutés automatiquement.
+Exemples de noms de sortie : `图片/presentation_001.jpg`, `视频/presentation_002.mp4` et `图表/presentation_003.xml`. Le nom combine le nom du PPTX et un numéro de diapositive à trois chiffres. Lorsque plusieurs ressources du même type existent sur une même diapositive, des suffixes comme `_02` et `_03` sont ajoutés automatiquement.
 
 ### Points d’entrée
 
@@ -452,15 +452,15 @@ Par défaut, le dossier de sortie est créé à côté du fichier PPTX et porte 
 ```text
 pptx_extracted_elements/
 ├── 图片/
-│   ├── 001_JPG.jpg
-│   ├── 001_JPG_02.jpg
-│   └── 002_PNG.png
+│   ├── presentation_001.jpg
+│   ├── presentation_001_02.jpg
+│   └── presentation_002.png
 ├── 视频/
-│   └── 002_MP4.mp4
+│   └── presentation_002.mp4
 ├── 图表/
-│   └── 003_CHART.xml
+│   └── presentation_003.xml
 ├── 文本/
-│   └── 003_TXT.txt
+│   └── presentation_003.txt
 └── manifest.csv
 ```
 
@@ -470,11 +470,11 @@ Lors du traitement de plusieurs fichiers PPTX :
 pptx_extracted_elements/
 ├── presentation1/
 │   ├── 图片/
-│   │   └── 001_JPG.jpg
+│   │   └── presentation1_001.jpg
 │   └── manifest.csv
 └── presentation2/
     ├── 图片/
-    │   └── 001_PNG.png
+    │   └── presentation2_001.png
     └── manifest.csv
 ```
 

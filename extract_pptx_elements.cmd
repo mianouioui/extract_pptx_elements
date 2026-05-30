@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions
-set "VERSION=V1.1.3"
+set "VERSION=V1.1.4"
 set "PPTX_EXTRACTOR_SCRIPT=%~f0"
 set "PPTX_EXTRACTOR_PY_TEMP=%TEMP%\extract_pptx_elements_py_%RANDOM%%RANDOM%.py"
 set "PPTX_EXTRACTOR_PS_TEMP=%TEMP%\extract_pptx_elements_ps_%RANDOM%%RANDOM%.ps1"
@@ -122,7 +122,7 @@ param([string[]]$LauncherArgs)
 
 $ErrorActionPreference = "Stop"
 
-$Version = "V1.1.3"
+$Version = "V1.1.4"
 $DefaultOutputDirName = "pptx_extracted_elements"
 
 $PackageRelsNs = "http://schemas.openxmlformats.org/package/2006/relationships"
@@ -472,37 +472,15 @@ function Get-Extension {
     return [System.IO.Path]::GetExtension($Part).ToLowerInvariant()
 }
 
-function Get-TagFor {
-    param(
-        [string]$Kind,
-        [string]$Part
-    )
-
-    $ext = (Get-Extension $Part).TrimStart(".").ToUpperInvariant()
-    if ($ext -eq "JPEG") { return "JPG" }
-    if ($Kind -eq "chart") { return "CHART" }
-    if ($Kind -eq "chart_style") { return "CHARTSTYLE" }
-    if ($Kind -eq "chart_colors") { return "CHARTCOLORS" }
-    if ($Kind -eq "diagram") { return "DIAGRAM" }
-    if ($Kind -eq "ole") { return "OLE" }
-    if ($Kind -eq "unknown") {
-        if ($ext) { return $ext }
-        return "FILE"
-    }
-    if ($ext) { return $ext }
-    return $Kind.ToUpperInvariant()
-}
-
 function Get-OutputSuffix {
     param(
-        [string]$Part,
-        [string]$Tag
+        [string]$Part
     )
 
     $ext = Get-Extension $Part
     if ($ext -eq ".jpeg") { return ".jpg" }
     if ($ext) { return $ext }
-    return ".$($Tag.ToLowerInvariant())"
+    return ".bin"
 }
 
 function Get-PartKind {
@@ -584,7 +562,6 @@ function Collect-SlideResources {
                 $resources.Add([PSCustomObject]@{
                     SlideNumber = $SlideNumber
                     Kind = $kind
-                    Tag = Get-TagFor $kind $targetPart
                     SourcePart = $SourcePart
                     TargetPart = $targetPart
                     RelId = $rel.Id
@@ -641,14 +618,14 @@ function Get-OutputDirForKind {
 function Get-UniqueOutputPath {
     param(
         [string]$OutputDir,
+        [string]$PptxStem,
         [int]$SlideNumber,
-        [string]$Tag,
         [string]$Suffix,
         [hashtable]$Counters,
         [bool]$Overwrite
     )
 
-    $key = "$OutputDir|$SlideNumber|$Tag"
+    $key = "$OutputDir|$SlideNumber"
     if (-not $Counters.ContainsKey($key)) {
         $Counters[$key] = 0
     }
@@ -656,10 +633,10 @@ function Get-UniqueOutputPath {
     $index = [int]$Counters[$key]
 
     if ($index -eq 1) {
-        $stem = "{0:D3}_{1}" -f $SlideNumber, $Tag
+        $stem = "{0}_{1:D3}" -f $PptxStem, $SlideNumber
     }
     else {
-        $stem = "{0:D3}_{1}_{2:D2}" -f $SlideNumber, $Tag, $index
+        $stem = "{0}_{1:D3}_{2:D2}" -f $PptxStem, $SlideNumber, $index
     }
     $candidate = Join-Path $OutputDir "$stem$Suffix"
 
@@ -799,6 +776,7 @@ function Extract-Pptx {
         New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
     }
 
+    $PptxStem = [System.IO.Path]::GetFileNameWithoutExtension($PptxPath)
     $zip = [System.IO.Compression.ZipFile]::OpenRead($PptxPath)
     try {
         $slideParts = @(Get-SlidePartsInOrder $zip)
@@ -812,9 +790,9 @@ function Extract-Pptx {
             $resources = @(Collect-SlideResources $zip $slidePart $slideNumber $MediaOnly)
 
             foreach ($resource in $resources) {
-                $suffix = Get-OutputSuffix $resource.TargetPart $resource.Tag
+                $suffix = Get-OutputSuffix $resource.TargetPart
                 $resourceOutputDir = Get-OutputDirForKind $OutputDir $resource.Kind
-                $destination = Get-UniqueOutputPath $resourceOutputDir $resource.SlideNumber $resource.Tag $suffix $counters $Overwrite
+                $destination = Get-UniqueOutputPath $resourceOutputDir $PptxStem $resource.SlideNumber $suffix $counters $Overwrite
                 if ($null -eq $destination) {
                     continue
                 }
@@ -836,7 +814,7 @@ function Extract-Pptx {
                 $slideText = Get-SlideText $zip $slidePart
                 if ($slideText) {
                     $textOutputDir = Get-OutputDirForKind $OutputDir "text"
-                    $textPath = Get-UniqueOutputPath $textOutputDir $slideNumber "TXT" ".txt" $counters $Overwrite
+                    $textPath = Get-UniqueOutputPath $textOutputDir $PptxStem $slideNumber ".txt" $counters $Overwrite
                     if ($null -ne $textPath) {
                         $parent = Split-Path -Parent $textPath
                         if (-not (Test-Path -LiteralPath $parent)) {
@@ -951,9 +929,9 @@ Examples:
   python3 extract_pptx_elements.py --no-text
 
 Output naming:
-  Slide 1 JPG: 图片/001_JPG.jpg
-  Slide 1 MP4: 视频/001_MP4.mp4
-  Second JPG on slide 1: 图片/001_JPG_02.jpg
+  Slide 1 JPG: 图片/presentation_001.jpg
+  Slide 1 MP4: 视频/presentation_001.mp4
+  Second JPG on slide 1: 图片/presentation_001_02.jpg
 """
 
 from __future__ import annotations
@@ -976,7 +954,7 @@ PRESENTATION_NS = "http://schemas.openxmlformats.org/presentationml/2006/main"
 OFFICE_RELS_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 DRAWING_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
 
-VERSION = "1.1.3"
+VERSION = "1.1.4"
 DEFAULT_OUTPUT_DIR_NAME = "pptx_extracted_elements"
 
 IMAGE_EXTS = {
@@ -1076,7 +1054,6 @@ class Relationship:
 class Resource:
     slide_number: int
     kind: str
-    tag: str
     source_part: str
     target_part: str
     rel_id: str
@@ -1244,32 +1221,13 @@ def extension_for(part: str) -> str:
     return PurePosixPath(part).suffix.lower()
 
 
-def tag_for(kind: str, part: str) -> str:
-    ext = extension_for(part).lstrip(".").upper()
-    if ext == "JPEG":
-        return "JPG"
-    if kind == "chart":
-        return "CHART"
-    if kind == "chart_style":
-        return "CHARTSTYLE"
-    if kind == "chart_colors":
-        return "CHARTCOLORS"
-    if kind == "diagram":
-        return "DIAGRAM"
-    if kind == "ole":
-        return "OLE"
-    if kind == "unknown":
-        return ext or "FILE"
-    return ext or kind.upper()
-
-
-def output_suffix_for(part: str, tag: str) -> str:
+def output_suffix_for(part: str) -> str:
     ext = extension_for(part)
     if ext == ".jpeg":
         return ".jpg"
     if ext:
         return ext
-    return f".{tag.lower()}"
+    return ".bin"
 
 
 def classify_part(rel_type: str, part: str) -> str | None:
@@ -1346,7 +1304,6 @@ def collect_slide_resources(
                     Resource(
                         slide_number=slide_number,
                         kind=kind,
-                        tag=tag_for(kind, target_part),
                         source_part=source_part,
                         target_part=target_part,
                         rel_id=rel.rel_id,
@@ -1378,17 +1335,17 @@ def extract_slide_text(zip_file: zipfile.ZipFile, slide_part: str) -> str:
 
 def unique_output_path(
     output_dir: Path,
+    pptx_stem: str,
     slide_number: int,
-    tag: str,
     suffix: str,
-    counters: dict[tuple[Path, int, str], int],
+    counters: dict[tuple[Path, int], int],
     *,
     overwrite: bool,
 ) -> Path | None:
-    key = (output_dir, slide_number, tag)
+    key = (output_dir, slide_number)
     counters[key] = counters.get(key, 0) + 1
     index = counters[key]
-    stem = f"{slide_number:03d}_{tag}" if index == 1 else f"{slide_number:03d}_{tag}_{index:02d}"
+    stem = f"{pptx_stem}_{slide_number:03d}" if index == 1 else f"{pptx_stem}_{slide_number:03d}_{index:02d}"
     candidate = output_dir / f"{stem}{suffix}"
 
     if overwrite:
@@ -1470,7 +1427,8 @@ def extract_pptx(
         raise ValueError(f"不是有效的 .pptx/zip 文件：{pptx_path}")
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    counters: dict[tuple[Path, int, str], int] = {}
+    pptx_stem = pptx_path.stem
+    counters: dict[tuple[Path, int], int] = {}
     manifest_rows: list[dict[str, str]] = []
     extracted_count = 0
 
@@ -1486,12 +1444,12 @@ def extract_pptx(
             )
 
             for resource in resources:
-                suffix = output_suffix_for(resource.target_part, resource.tag)
+                suffix = output_suffix_for(resource.target_part)
                 resource_output_dir = kind_output_dir(output_dir, resource.kind)
                 destination = unique_output_path(
                     resource_output_dir,
+                    pptx_stem,
                     resource.slide_number,
-                    resource.tag,
                     suffix,
                     counters,
                     overwrite=overwrite,
@@ -1522,8 +1480,8 @@ def extract_pptx(
                 if slide_text:
                     text_path = unique_output_path(
                         kind_output_dir(output_dir, "text"),
+                        pptx_stem,
                         slide_number,
-                        "TXT",
                         ".txt",
                         counters,
                         overwrite=overwrite,
