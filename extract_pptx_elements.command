@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-#  PPTX 元素提取工具 V1.1.2 - macOS 单文件启动器
+#  PPTX 内容提取器 V1.1.2 - macOS 单文件启动器
 #  双击即可运行，兼容 Intel 和 Apple Silicon Mac
 # ============================================================
 
@@ -34,7 +34,7 @@ fi
 
 if [ $# -eq 0 ]; then
     echo "╔══════════════════════════════════════════╗"
-    echo "║     PPTX 元素提取工具 $VERSION           ║"
+    echo "║     PPTX 内容提取器 $VERSION           ║"
     echo "║     extract_pptx_elements               ║"
     echo "╚══════════════════════════════════════════╝"
     echo ""
@@ -85,7 +85,7 @@ exit $EXIT_CODE
 # ---PYTHON_CODE_BELOW---
 #!/usr/bin/env python3
 """
-Extract slide-level resources from PowerPoint .pptx files.
+PPTX 内容提取器 - Extract slide-level resources from PowerPoint .pptx files.
 
 Examples:
   python3 extract_pptx_elements.py "deck.pptx"
@@ -228,8 +228,9 @@ class Resource:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Extract images, videos, audio, embedded files, charts, and diagrams "
-            "from .pptx files into Chinese type folders using slide-number-based names."
+            "PPTX 内容提取器 - Extract images, videos, audio, embedded files, charts, "
+            "and diagrams from .pptx files into Chinese type folders using "
+            "slide-number-based names."
         )
     )
     parser.add_argument(

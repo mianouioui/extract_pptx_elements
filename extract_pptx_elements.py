@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Extract slide-level resources from PowerPoint .pptx files.
+PPTX 内容提取器 - Extract slide-level resources from PowerPoint .pptx files.
 
 Examples:
   python3 extract_pptx_elements.py "deck.pptx"
@@ -143,8 +143,9 @@ class Resource:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Extract images, videos, audio, embedded files, charts, and diagrams "
-            "from .pptx files into Chinese type folders using slide-number-based names."
+            "PPTX 内容提取器 - Extract images, videos, audio, embedded files, charts, "
+            "and diagrams from .pptx files into Chinese type folders using "
+            "slide-number-based names."
         )
     )
     parser.add_argument(

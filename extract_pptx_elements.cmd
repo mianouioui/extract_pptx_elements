@@ -6,7 +6,7 @@ set "PPTX_EXTRACTOR_PY_TEMP=%TEMP%\extract_pptx_elements_py_%RANDOM%%RANDOM%.py"
 set "PPTX_EXTRACTOR_PS_TEMP=%TEMP%\extract_pptx_elements_ps_%RANDOM%%RANDOM%.ps1"
 chcp 65001 >nul
 REM ============================================================
-REM  PPTX 元素提取工具 %VERSION% - Windows 单文件启动器
+REM  PPTX 内容提取器 %VERSION% - Windows 单文件启动器
 REM  直接双击或拖拽 .pptx 到本文件即可运行
 REM ============================================================
 
@@ -162,7 +162,7 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 function Show-Banner {
     Write-Host "╔══════════════════════════════════════════╗"
-    Write-Host "║     PPTX 元素提取工具 $Version           ║"
+    Write-Host "║     PPTX 内容提取器 $Version           ║"
     Write-Host "║     extract_pptx_elements               ║"
     Write-Host "╚══════════════════════════════════════════╝"
     Write-Host ""
@@ -943,7 +943,7 @@ exit (Main -Argv $LauncherArgs)
 # PYTHON_CODE_BELOW
 #!/usr/bin/env python3
 """
-Extract slide-level resources from PowerPoint .pptx files.
+PPTX 内容提取器 - Extract slide-level resources from PowerPoint .pptx files.
 
 Examples:
   python3 extract_pptx_elements.py "deck.pptx"
@@ -1086,8 +1086,9 @@ class Resource:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Extract images, videos, audio, embedded files, charts, and diagrams "
-            "from .pptx files into Chinese type folders using slide-number-based names."
+            "PPTX 内容提取器 - Extract images, videos, audio, embedded files, charts, "
+            "and diagrams from .pptx files into Chinese type folders using "
+            "slide-number-based names."
         )
     )
     parser.add_argument(
