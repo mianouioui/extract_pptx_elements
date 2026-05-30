@@ -5,7 +5,7 @@ Extract slide-level resources from PowerPoint .pptx files.
 Examples:
   python3 extract_pptx_elements.py "deck.pptx"
   python3 extract_pptx_elements.py "deck.pptx" -o exported_assets
-  python3 extract_pptx_elements.py --with-text
+  python3 extract_pptx_elements.py --no-text
 
 Output naming:
   Slide 1 JPG: 图片/001_JPG.jpg
@@ -166,10 +166,19 @@ def parse_args() -> argparse.Namespace:
             "the PPTX file being processed."
         ),
     )
-    parser.add_argument(
+    text_group = parser.add_mutually_exclusive_group()
+    text_group.add_argument(
         "--with-text",
+        dest="with_text",
         action="store_true",
-        help="Also export plain slide text as 001_TXT.txt, 002_TXT.txt, etc.",
+        default=True,
+        help="Export plain slide text as 001_TXT.txt, 002_TXT.txt, etc. Enabled by default.",
+    )
+    text_group.add_argument(
+        "--no-text",
+        dest="with_text",
+        action="store_false",
+        help="Do not export plain slide text.",
     )
     parser.add_argument(
         "--media-only",
@@ -431,7 +440,7 @@ def unique_output_path(
     counters: dict[tuple[Path, int, str], int],
     *,
     overwrite: bool,
-) -> Path:
+) -> Path | None:
     key = (output_dir, slide_number, tag)
     counters[key] = counters.get(key, 0) + 1
     index = counters[key]
@@ -441,10 +450,8 @@ def unique_output_path(
     if overwrite:
         return candidate
 
-    collision_index = index
-    while candidate.exists():
-        collision_index += 1
-        candidate = output_dir / f"{slide_number:03d}_{tag}_{collision_index:02d}{suffix}"
+    if candidate.exists():
+        return None
 
     return candidate
 
@@ -545,6 +552,8 @@ def extract_pptx(
                     counters,
                     overwrite=overwrite,
                 )
+                if destination is None:
+                    continue
                 extract_file(
                     pptx_zip,
                     resource.target_part,
@@ -575,20 +584,21 @@ def extract_pptx(
                         counters,
                         overwrite=overwrite,
                     )
-                    text_path.parent.mkdir(parents=True, exist_ok=True)
-                    text_path.write_text(slide_text + "\n", encoding="utf-8")
-                    extracted_count += 1
-                    manifest_rows.append(
-                        {
-                            "slide": f"{slide_number:03d}",
-                            "output_file": relative_output_file(text_path, output_dir),
-                            "kind": "text",
-                            "source_part": slide_part,
-                            "target_part": slide_part,
-                            "relationship_id": "",
-                            "relationship_type": "",
-                        }
-                    )
+                    if text_path is not None:
+                        text_path.parent.mkdir(parents=True, exist_ok=True)
+                        text_path.write_text(slide_text + "\n", encoding="utf-8")
+                        extracted_count += 1
+                        manifest_rows.append(
+                            {
+                                "slide": f"{slide_number:03d}",
+                                "output_file": relative_output_file(text_path, output_dir),
+                                "kind": "text",
+                                "source_part": slide_part,
+                                "target_part": slide_part,
+                                "relationship_id": "",
+                                "relationship_type": "",
+                            }
+                        )
 
     write_manifest(output_dir / "manifest.csv", manifest_rows)
     return len(slide_parts), extracted_count
@@ -621,7 +631,7 @@ def main() -> int:
                 pptx_path,
                 destination_dir,
                 media_only=args.media_only,
-                with_text=args.with_text,
+                with_text=args.with_text and not args.media_only,
                 overwrite=args.overwrite,
             )
         except (OSError, ValueError, zipfile.BadZipFile) as exc:
