@@ -72,7 +72,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Self-contained `extract_pptx_elements.command` launcher with embedded Python code — zero external files needed
 - `extract_pptx_elements.cmd` launcher for Windows
-- Pre-built macOS ARM64 standalone binary in `dist/`
 - Build scripts: `build_macos.sh` and `build_windows.bat`
 - Bilingual Chinese/English README
 
