@@ -21,29 +21,31 @@
 
 ---
 
-## 🚀 一键启动（推荐 / Recommended）
+## 🚀 快速开始 / Quick Start
 
-**只需一个文件**——发给别人就能用，**兼容 Intel 和 Apple Silicon Mac**。Python 代码已内嵌，只要 Mac 有 Python 3 即可运行（macOS 通常自带）。
-> **Just one file** — send it and it works. Python code is embedded inside. **Compatible with both Intel and Apple Silicon Macs** as long as Python 3 is available (usually pre-installed on macOS).
+### macOS
 
-| 平台 / Platform | 文件 / File | 说明 |
-|----------|------|------|
-| **macOS** | [extract_pptx_elements.command](extract_pptx_elements.command) | **📎 就发这一个**。双击运行，代码内嵌，无需其他文件 |
-| **Windows** | [extract_pptx_elements.cmd](extract_pptx_elements.cmd) | 双击运行，需同目录下有 `.py` 文件 |
+[extract_pptx_elements.command](extract_pptx_elements.command) 是一个独立文件，内嵌完整 Python 源码，双击即可运行。**兼容 Intel 和 Apple Silicon Mac**，只需系统自带 Python 3。
+> [extract_pptx_elements.command](extract_pptx_elements.command) is a single self-contained file. Double-click to run. **Works on Intel and Apple Silicon Macs** with system Python 3.
 
-### 🎁 发给你女朋友
-
-```
-只需发送: extract_pptx_elements.command  ← 一个文件就够了！
-```
-
-她收到后：
-1. 如果系统提示「无法打开来自未知开发者的程序」→ 右键点击文件 → **打开** → 确认
-2. 双击 `extract_pptx_elements.command`
+1. 双击 `extract_pptx_elements.command`
+2. 若提示「无法验证开发者」→ 右键点击 → **打开** → 确认
 3. 将 `.pptx` 文件拖入窗口，按回车
-4. 提取结果保存在同目录的 `pptx_extracted_elements/` 文件夹中
+4. 结果保存在 `pptx_extracted_elements/` 目录
 
-> **Intel Mac 用户**：`.command` 内嵌完整 Python 源码，只要系统有 Python 3（macOS 通常自带），就能正常运行。不需要预编译二进制。
+```bash
+# 或终端运行 / Or run in terminal
+./extract_pptx_elements.command presentation.pptx
+```
+
+### Windows
+
+需将 `extract_pptx_elements.cmd` 与 `extract_pptx_elements.py` 放在同一目录，双击 `.cmd` 运行。或自行编译 `.exe`。
+> Place `extract_pptx_elements.cmd` and `extract_pptx_elements.py` in the same folder, double-click `.cmd`. Or build `.exe`.
+
+```cmd
+extract_pptx_elements.cmd presentation.pptx
+```
 
 ---
 
