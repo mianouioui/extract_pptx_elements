@@ -1,5 +1,7 @@
 # extract_pptx_elements
 
+## PPTX 内容提取器
+
 从 PowerPoint `.pptx` 文件中按幻灯片提取图片、视频、音频、图表、图示、嵌入文件和文本，按类型放入中文子文件夹，输出文件以幻灯片序号命名，清晰明了。
 > Extract slide-level resources (images, videos, audio, charts, diagrams, embedded files, and text) from PowerPoint `.pptx` files into type-based folders with clean, slide-number-based file naming.
 

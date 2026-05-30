@@ -11,7 +11,7 @@ xattr -d com.apple.quarantine "$0" >/dev/null 2>&1 || true
 
 set -e
 
-VERSION="V1.0.4"
+VERSION="V1.0.5"
 
 LAUNCHER_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$LAUNCHER_DIR"
