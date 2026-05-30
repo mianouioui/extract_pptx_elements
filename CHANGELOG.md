@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-05-30
+
+### Changed
+
+- Moved build scripts into `scripts/`.
+- Keep generated PyInstaller spec files under `build/specs/`.
+- Extracted files are now organized into Chinese type folders such as `图片/`, `视频/`, `音频/`, `图表/`, `图示/`, `嵌入文件/`, and `文本/`.
+- Completion output now reminds users that the main output folder can be found in the current folder.
+
 ## [1.0.3] - 2026-05-30
 
 ### Fixed
@@ -60,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero external dependencies (Python stdlib only)
 - Support for Python 3.8+
 
+[1.0.4]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.0.4
 [1.0.3]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.0.3
 [1.0.2]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.0.2
 [1.0.1]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.0.1

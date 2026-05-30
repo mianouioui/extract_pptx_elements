@@ -4,10 +4,12 @@
 
 set -e
 
-cd "$(dirname "$0")"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR/.."
 
 echo "=== Building macOS executable ==="
-pyinstaller --onefile --name extract_pptx_elements extract_pptx_elements.py
+mkdir -p build/specs
+pyinstaller --onefile --name extract_pptx_elements --specpath build/specs extract_pptx_elements.py
 
 echo ""
 echo "Done! Binary at: dist/extract_pptx_elements"

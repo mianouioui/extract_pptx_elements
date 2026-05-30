@@ -1,7 +1,7 @@
 # extract_pptx_elements
 
-从 PowerPoint `.pptx` 文件中按幻灯片提取图片、视频、音频、图表、图示、嵌入文件和文本，输出文件以幻灯片序号命名，清晰明了。
-> Extract slide-level resources (images, videos, audio, charts, diagrams, embedded files, and text) from PowerPoint `.pptx` files with clean, slide-number-based file naming.
+从 PowerPoint `.pptx` 文件中按幻灯片提取图片、视频、音频、图表、图示、嵌入文件和文本，按类型放入中文子文件夹，输出文件以幻灯片序号命名，清晰明了。
+> Extract slide-level resources (images, videos, audio, charts, diagrams, embedded files, and text) from PowerPoint `.pptx` files into type-based folders with clean, slide-number-based file naming.
 
 ## 功能 / Features
 
@@ -14,10 +14,11 @@
 | **图示 / Diagrams** | SmartArt 图示 XML |
 | **嵌入对象 / Embedded** | PDF, DOCX, XLSX, ZIP 等 |
 | **幻灯片文本 / Text** | 通过 `--with-text` 提取纯文本 |
+| **中文分类目录 / Chinese Folders** | 图片、视频、音频、图表、图示、嵌入文件、文本 |
 | **清单 / Manifest** | 自动生成 `manifest.csv`，记录每个输出文件的来源 |
 
-输出文件命名规则：`001_JPG.jpg`、`002_MP4.mp4`、`003_CHART.xml`——前3位数字对应幻灯片编号。
-> Output files are named like `001_JPG.jpg`, `002_MP4.mp4`, `003_CHART.xml` — the 3-digit prefix matches the slide number.
+输出文件命名规则：`图片/001_JPG.jpg`、`视频/002_MP4.mp4`、`图表/003_CHART.xml`——前3位数字对应幻灯片编号。
+> Output files are named like `图片/001_JPG.jpg`, `视频/002_MP4.mp4`, `图表/003_CHART.xml` — the 3-digit prefix matches the slide number.
 
 ---
 
@@ -58,7 +59,7 @@ extract_pptx_elements.cmd presentation.pptx
 |----------|------|
 | **macOS** (Apple Silicon / M1-M3) | [`dist/extract_pptx_elements`](dist/extract_pptx_elements) |
 | **macOS** (Intel) | 请双击 `.command` 启动器（自动用 Python 源码）或自行编译 |
-| **Windows** (x64) | 在 Windows 上运行 `build_windows.bat` 编译 / Build via `build_windows.bat` on Windows |
+| **Windows** (x64) | 在 Windows 上运行 `scripts\build_windows.bat` 编译 / Build via `scripts\build_windows.bat` on Windows |
 
 ### macOS
 
@@ -125,22 +126,28 @@ python3 extract_pptx_elements.py
 
 ```
 pptx_extracted_elements/
-├── 001_JPG.jpg          # 第1页幻灯片，第1张图片 / Slide 1, first image
-├── 001_JPG_02.jpg       # 第1页幻灯片，第2张图片 / Slide 1, second image
-├── 002_MP4.mp4          # 第2页幻灯片，视频 / Slide 2, video
-├── 002_PNG.png          # 第2页幻灯片，图片 / Slide 2, image
-├── 003_CHART.xml        # 第3页幻灯片，图表 / Slide 3, chart
-├── 003_TXT.txt          # 第3页幻灯片，文本（需 --with-text）
-├── manifest.csv         # 提取文件总清单
+├── 图片/
+│   ├── 001_JPG.jpg      # 第1页幻灯片，第1张图片 / Slide 1, first image
+│   ├── 001_JPG_02.jpg   # 第1页幻灯片，第2张图片 / Slide 1, second image
+│   └── 002_PNG.png      # 第2页幻灯片，图片 / Slide 2, image
+├── 视频/
+│   └── 002_MP4.mp4      # 第2页幻灯片，视频 / Slide 2, video
+├── 图表/
+│   └── 003_CHART.xml    # 第3页幻灯片，图表 / Slide 3, chart
+├── 文本/
+│   └── 003_TXT.txt      # 第3页幻灯片，文本（需 --with-text）
+└── manifest.csv         # 提取文件总清单
 
 # 处理多个 .pptx 时，每个文件独立子目录：
 # When processing multiple .pptx files, each gets its own subfolder:
 pptx_extracted_elements/
 ├── presentation1/
-│   ├── 001_JPG.jpg
+│   ├── 图片/
+│   │   └── 001_JPG.jpg
 │   └── manifest.csv
 └── presentation2/
-    ├── 001_PNG.png
+    ├── 图片/
+    │   └── 001_PNG.png
     └── manifest.csv
 ```
 
@@ -151,7 +158,7 @@ pptx_extracted_elements/
 | 列名 / Column | 说明 / Description |
 |-------------------|------------------------------------------|
 | slide             | 3位幻灯片编号 / 3-digit slide number |
-| output_file       | 提取出的文件名 / Extracted file name |
+| output_file       | 提取文件的相对路径，如 `图片/001_JPG.jpg` / Extracted relative path |
 | kind              | 类型：image, video, audio, chart, diagram 等 |
 | source_part       | .pptx 内部源路径 / Source path in zip |
 | target_part       | .pptx 内部资源路径 / Target resource path |
@@ -168,7 +175,7 @@ PowerPoint `.pptx` 文件本质上是一个包含 XML 和媒体文件的 ZIP 压
 1. 将 `.pptx` 作为 ZIP 打开 / Opens the `.pptx` as a ZIP archive
 2. 读取 `ppt/presentation.xml` 确定幻灯片顺序 / Reads `ppt/presentation.xml` to determine slide order
 3. 遍历每页幻灯片的关系树，查找图片、视频、音频、图表、图示和嵌入对象 / Walks each slide's relationship tree to find resources
-4. 以幻灯片编号为前缀提取每个资源 / Extracts each resource with a slide-prefixed filename
+4. 按类型放入中文子文件夹，并以幻灯片编号为前缀提取每个资源 / Extracts each resource into a type folder with a slide-prefixed filename
 5. （可选）从幻灯片 XML 中提取可见文本 / Optionally extracts visible text from slide XML
 6. 生成 `manifest.csv` 记录完整溯源信息 / Writes a `manifest.csv` with full provenance
 
@@ -185,20 +192,20 @@ PowerPoint `.pptx` 文件本质上是一个包含 XML 和媒体文件的 ZIP 压
 pip3 install pyinstaller
 
 # Apple Silicon (M1/M2/M3)
-./build_macos.sh
+./scripts/build_macos.sh
 
 # Intel Mac（在 Intel Mac 上运行）
-./build_macos.sh
+./scripts/build_macos.sh
 
 # 或在 Apple Silicon 上编译通用二进制（同时支持 Intel + ARM）
-pyinstaller --onefile --name extract_pptx_elements --target-arch universal2 extract_pptx_elements.py
+pyinstaller --onefile --name extract_pptx_elements --specpath build/specs --target-arch universal2 extract_pptx_elements.py
 ```
 
 ### Windows
 
 ```cmd
 pip install pyinstaller
-build_windows.bat
+scripts\build_windows.bat
 ```
 
 > **注意 / Note:** PyInstaller 只能在当前操作系统下编译，跨平台编译需分别执行。Intel Mac 用户直接用 `.command` 启动器即可，无需编译。

@@ -8,9 +8,9 @@ Examples:
   python3 extract_pptx_elements.py --with-text
 
 Output naming:
-  Slide 1 JPG: 001_JPG.jpg
-  Slide 1 MP4: 001_MP4.mp4
-  Second JPG on slide 1: 001_JPG_02.jpg
+  Slide 1 JPG: 图片/001_JPG.jpg
+  Slide 1 MP4: 视频/001_MP4.mp4
+  Second JPG on slide 1: 图片/001_JPG_02.jpg
 """
 
 from __future__ import annotations
@@ -104,6 +104,19 @@ REL_SKIP_WORDS = (
     "/viewProps",
 )
 
+KIND_FOLDER_NAMES = {
+    "audio": "音频",
+    "chart": "图表",
+    "chart_colors": "图表",
+    "chart_style": "图表",
+    "diagram": "图示",
+    "embedded": "嵌入文件",
+    "image": "图片",
+    "ole": "嵌入文件",
+    "text": "文本",
+    "video": "视频",
+}
+
 
 @dataclass(frozen=True)
 class Relationship:
@@ -128,7 +141,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Extract images, videos, audio, embedded files, charts, and diagrams "
-            "from .pptx files using slide-number-based names."
+            "from .pptx files into Chinese type folders using slide-number-based names."
         )
     )
     parser.add_argument(
@@ -404,11 +417,11 @@ def unique_output_path(
     slide_number: int,
     tag: str,
     suffix: str,
-    counters: dict[tuple[int, str], int],
+    counters: dict[tuple[Path, int, str], int],
     *,
     overwrite: bool,
 ) -> Path:
-    key = (slide_number, tag)
+    key = (output_dir, slide_number, tag)
     counters[key] = counters.get(key, 0) + 1
     index = counters[key]
     stem = f"{slide_number:03d}_{tag}" if index == 1 else f"{slide_number:03d}_{tag}_{index:02d}"
@@ -446,6 +459,14 @@ def output_dir_for(pptx_path: Path, base_output_dir: Path, multi_input: bool) ->
     return base_output_dir
 
 
+def kind_output_dir(output_dir: Path, kind: str) -> Path:
+    return output_dir / KIND_FOLDER_NAMES.get(kind, "其他")
+
+
+def relative_output_file(path: Path, output_dir: Path) -> str:
+    return path.relative_to(output_dir).as_posix()
+
+
 def write_manifest(manifest_path: Path, rows: list[dict[str, str]]) -> None:
     fieldnames = [
         "slide",
@@ -476,7 +497,7 @@ def extract_pptx(
         raise ValueError(f"Not a valid .pptx/zip file: {pptx_path}")
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    counters: dict[tuple[int, str], int] = {}
+    counters: dict[tuple[Path, int, str], int] = {}
     manifest_rows: list[dict[str, str]] = []
     extracted_count = 0
 
@@ -493,8 +514,9 @@ def extract_pptx(
 
             for resource in resources:
                 suffix = output_suffix_for(resource.target_part, resource.tag)
+                resource_output_dir = kind_output_dir(output_dir, resource.kind)
                 destination = unique_output_path(
-                    output_dir,
+                    resource_output_dir,
                     resource.slide_number,
                     resource.tag,
                     suffix,
@@ -511,7 +533,7 @@ def extract_pptx(
                 manifest_rows.append(
                     {
                         "slide": f"{resource.slide_number:03d}",
-                        "output_file": destination.name,
+                        "output_file": relative_output_file(destination, output_dir),
                         "kind": resource.kind,
                         "source_part": resource.source_part,
                         "target_part": resource.target_part,
@@ -524,19 +546,20 @@ def extract_pptx(
                 slide_text = extract_slide_text(pptx_zip, slide_part)
                 if slide_text:
                     text_path = unique_output_path(
-                        output_dir,
+                        kind_output_dir(output_dir, "text"),
                         slide_number,
                         "TXT",
                         ".txt",
                         counters,
                         overwrite=overwrite,
                     )
+                    text_path.parent.mkdir(parents=True, exist_ok=True)
                     text_path.write_text(slide_text + "\n", encoding="utf-8")
                     extracted_count += 1
                     manifest_rows.append(
                         {
                             "slide": f"{slide_number:03d}",
-                            "output_file": text_path.name,
+                            "output_file": relative_output_file(text_path, output_dir),
                             "kind": "text",
                             "source_part": slide_part,
                             "target_part": slide_part,
@@ -577,6 +600,11 @@ def main() -> int:
             f"{pptx_path.name}: {slide_count} slides, "
             f"{extracted_count} files -> {destination_dir}"
         )
+
+    if args.output.expanduser().is_absolute():
+        print(f"提醒：主输出文件夹在这里：{output_base}")
+    else:
+        print(f"提醒：在当前文件夹可以找到主文件夹：{args.output}")
 
     return 0
 

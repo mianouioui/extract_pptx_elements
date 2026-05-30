@@ -1,5 +1,5 @@
 @echo off
-set VERSION=V1.0.3
+set VERSION=V1.0.4
 chcp 65001 >nul
 REM ============================================================
 REM  PPTX 元素提取工具 %VERSION% - Windows 启动器
@@ -65,7 +65,7 @@ if exist "%BINARY%" (
 REM 策略3：都没找到
 echo ✗ 未找到 Python 或可执行文件。
 echo   请安装 Python 3: https://www.python.org/downloads/
-echo   或在 Windows 上编译: build_windows.bat
+echo   或在 Windows 上编译: scripts\build_windows.bat
 echo.
 echo 按任意键关闭此窗口 ...
 pause >nul
@@ -74,6 +74,7 @@ exit /b 1
 :end
 echo.
 echo 完成！(退出码: %errorlevel%)
+echo 提醒：默认情况下，在当前文件夹可以找到主文件夹：pptx_extracted_elements
 echo 按任意键关闭此窗口 ...
 pause >nul
 exit /b %errorlevel%
