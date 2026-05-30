@@ -1,0 +1,11 @@
+# Windows batch/PowerShell launchers — must preserve CRLF in repo
+# so direct downloads from GitHub work on Windows
+*.cmd -text
+*.bat -text
+
+# Unix shell scripts require LF line endings
+*.command text eol=lf
+*.sh text eol=lf
+
+# Python source: let Git auto-detect
+*.py text
