@@ -88,7 +88,7 @@ extract_pptx_elements.cmd presentation.pptx
 
 ```bash
 # 克隆仓库 / Clone the repository
-git clone https://github.com/yourusername/extract_pptx_elements.git
+git clone https://github.com/mianouioui/extract_pptx_elements.git
 cd extract_pptx_elements
 
 # 赋予执行权限（可选）/ Make the script executable (optional)
