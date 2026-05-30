@@ -15,12 +15,38 @@ Extract slide-level resources (images, videos, audio, charts, diagrams, embedded
 
 Output files are named like `001_JPG.jpg`, `002_MP4.mp4`, `003_CHART.xml` — the 3-digit prefix matches the slide number.
 
-## Requirements
+## Quick Start — No Python Required
+
+Pre-built standalone executables are in the [`dist/`](dist/) folder:
+
+| Platform | File |
+|----------|------|
+| **macOS** (Apple Silicon) | [`dist/extract_pptx_elements`](dist/extract_pptx_elements) |
+| **Windows** (x64) | Build via `build_windows.bat` on a Windows machine |
+
+### macOS
+
+```bash
+# Download and run directly
+./dist/extract_pptx_elements presentation.pptx
+
+# Or install system-wide
+cp dist/extract_pptx_elements /usr/local/bin/
+extract_pptx_elements presentation.pptx
+```
+
+### Windows
+
+```cmd
+dist\extract_pptx_elements.exe presentation.pptx
+```
+
+## Requirements (Python Version)
 
 - Python 3.8+
 - No third-party dependencies (stdlib only: `zipfile`, `xml.etree`, `argparse`, `csv`)
 
-## Installation
+## Installation (Python)
 
 ```bash
 # Clone the repository
@@ -99,6 +125,28 @@ PowerPoint `.pptx` files are ZIP archives containing XML and media files. This t
 4. Extracts each resource with a slide-prefixed filename
 5. Optionally extracts visible text from slide XML
 6. Writes a `manifest.csv` with full provenance information
+
+## Build Standalone Executables
+
+Build a self-contained binary that runs without Python:
+
+### macOS
+
+```bash
+pip3 install pyinstaller
+./build_macos.sh
+# Binary at: dist/extract_pptx_elements
+```
+
+### Windows
+
+```cmd
+pip install pyinstaller
+build_windows.bat
+REM Binary at: dist\extract_pptx_elements.exe
+```
+
+> **Note:** PyInstaller can only build for the current OS. Build on each platform separately.
 
 ## License
 

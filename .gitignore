@@ -25,6 +25,10 @@ env/
 .DS_Store
 Thumbs.db
 
+# PyInstaller build artifacts
+build/
+*.spec
+
 # Temporary files
 ~$*
 .~*
