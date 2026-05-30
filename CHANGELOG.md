@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-05-30
+
+### Changed
+
+- Changed the default output location to create `pptx_extracted_elements/` next to the input PPTX file, which is friendlier for drag-and-drop launcher usage.
+- Made `extract_pptx_elements.cmd` a self-contained launcher with embedded Python source, so it no longer requires `extract_pptx_elements.py` beside it.
+- Refreshed `extract_pptx_elements.command` with the latest embedded core logic.
+- Removed the optional `scripts/` build helpers because they are not needed for the one-file quick-use workflow.
+- Improved per-file error handling so one bad input does not stop other PPTX files from being processed.
+- Updated README runtime documentation with more formal software operation details.
+
 ## [1.0.5] - 2026-05-30
 
 ### Changed
@@ -75,6 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero external dependencies (Python stdlib only)
 - Support for Python 3.8+
 
+[1.1.1]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.1.1
 [1.0.5]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.0.5
 [1.0.4]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.0.4
 [1.0.3]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.0.3

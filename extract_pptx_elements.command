@@ -1,23 +1,22 @@
 #!/bin/bash
 # ============================================================
-#  PPTX 元素提取工具 - macOS 独立启动器
+#  PPTX 元素提取工具 V1.1.1 - macOS 单文件启动器
 #  双击即可运行，兼容 Intel 和 Apple Silicon Mac
 # ============================================================
 
-# -------- 自修复：解决 macOS 传输后权限丢失问题 --------
-# AirDrop/微信/邮件传输可能剥离 +x 权限并添加隔离标记
+# AirDrop/微信/邮件传输可能剥离 +x 权限并添加隔离标记。
 chmod +x "$0" >/dev/null 2>&1 || true
 xattr -d com.apple.quarantine "$0" >/dev/null 2>&1 || true
 
-set -e
-
-VERSION="V1.0.5"
-
+VERSION="V1.1.1"
 LAUNCHER_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$LAUNCHER_DIR"
+cd "$LAUNCHER_DIR" || exit 1
 
-# -------- 检查 Python 3 --------
-if ! command -v python3 &>/dev/null; then
+if command -v python3 >/dev/null 2>&1; then
+    PYTHON="$(command -v python3)"
+elif command -v python >/dev/null 2>&1; then
+    PYTHON="$(command -v python)"
+else
     echo "============================================"
     echo "  需要 Python 3，您的 Mac 尚未安装。"
     echo "  正在尝试通过 Xcode 命令行工具安装..."
@@ -33,9 +32,6 @@ if ! command -v python3 &>/dev/null; then
     exit 1
 fi
 
-PYTHON="$(command -v python3)"
-
-# -------- 交互式提示（无参数时）--------
 if [ $# -eq 0 ]; then
     echo "╔══════════════════════════════════════════╗"
     echo "║     PPTX 元素提取工具 $VERSION           ║"
@@ -58,15 +54,23 @@ if [ $# -eq 0 ]; then
         read -r -p "按回车关闭..." _
         exit 0
     fi
-    eval "set -- $input_args"
+
+    if [ -e "$input_args" ]; then
+        set -- "$input_args"
+    else
+        eval "set -- $input_args"
+    fi
 fi
 
-# -------- 将内嵌的 Python 代码写入临时文件并运行 --------
-PY_TEMP=$(mktemp /tmp/extract_pptx_elements_XXXXXX.py)
+PY_TEMP="$(mktemp /tmp/extract_pptx_elements_XXXXXX.py)" || exit 1
 trap 'rm -f "$PY_TEMP"' EXIT
-
-# 从本文件末尾提取 Python 代码（标记后）
 sed '1,/^# ---PYTHON_CODE_BELOW---$/d' "$0" > "$PY_TEMP"
+
+if [ ! -s "$PY_TEMP" ]; then
+    echo "启动器损坏：未找到内嵌 Python 代码。"
+    read -r -p "按回车关闭..." _
+    exit 1
+fi
 
 echo "→ 运行中..."
 "$PYTHON" "$PY_TEMP" "$@"
@@ -74,7 +78,7 @@ EXIT_CODE=$?
 
 echo ""
 echo "完成！(退出码: $EXIT_CODE)"
-echo "提醒：默认情况下，在当前文件夹可以找到主文件夹：pptx_extracted_elements"
+echo "提醒：默认输出文件夹会出现在 PPTX 文件旁边，名称为 pptx_extracted_elements。"
 read -r -p "按回车关闭窗口..." _
 exit $EXIT_CODE
 
@@ -113,6 +117,9 @@ PACKAGE_RELS_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
 PRESENTATION_NS = "http://schemas.openxmlformats.org/presentationml/2006/main"
 OFFICE_RELS_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 DRAWING_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
+
+VERSION = "1.1.1"
+DEFAULT_OUTPUT_DIR_NAME = "pptx_extracted_elements"
 
 IMAGE_EXTS = {
     ".bmp",
@@ -238,8 +245,11 @@ def parse_args() -> argparse.Namespace:
         "-o",
         "--output",
         type=Path,
-        default=Path("pptx_extracted_elements"),
-        help="Output directory. Default: pptx_extracted_elements",
+        default=None,
+        help=(
+            "Output directory. Default: create pptx_extracted_elements next to "
+            "the PPTX file being processed."
+        ),
     )
     parser.add_argument(
         "--with-text",
@@ -255,6 +265,11 @@ def parse_args() -> argparse.Namespace:
         "--overwrite",
         action="store_true",
         help="Overwrite files in the output directory if they already exist.",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {VERSION}",
     )
     return parser.parse_args()
 
@@ -534,7 +549,18 @@ def extract_file(
         shutil.copyfileobj(source, target)
 
 
-def output_dir_for(pptx_path: Path, base_output_dir: Path, multi_input: bool) -> Path:
+def output_dir_for(
+    pptx_path: Path,
+    output_arg: Path | None,
+    multi_input: bool,
+) -> Path:
+    if output_arg is None:
+        base_output_dir = pptx_path.parent / DEFAULT_OUTPUT_DIR_NAME
+    else:
+        base_output_dir = output_arg.expanduser()
+        if not base_output_dir.is_absolute():
+            base_output_dir = Path.cwd() / base_output_dir
+
     if multi_input:
         return base_output_dir / pptx_path.stem
     return base_output_dir
@@ -575,7 +601,7 @@ def extract_pptx(
     if not pptx_path.exists():
         raise FileNotFoundError(pptx_path)
     if not zipfile.is_zipfile(pptx_path):
-        raise ValueError(f"Not a valid .pptx/zip file: {pptx_path}")
+        raise ValueError(f"不是有效的 .pptx/zip 文件：{pptx_path}")
 
     output_dir.mkdir(parents=True, exist_ok=True)
     counters: dict[tuple[Path, int, str], int] = {}
@@ -658,36 +684,56 @@ def main() -> int:
     input_files = find_input_files(args)
 
     if not input_files:
-        print("No .pptx files found. Pass a file path or run this in a PPTX folder.", file=sys.stderr)
+        print(
+            "未找到 .pptx 文件。请拖入/传入 PPTX 文件，或把本工具放到 PPTX 所在文件夹运行。",
+            file=sys.stderr,
+        )
         return 1
 
-    output_base = args.output.expanduser().resolve()
     multi_input = len(input_files) > 1
+    output_dirs: list[Path] = []
+    success_count = 0
+    failure_count = 0
 
     for pptx_path in input_files:
         if is_temp_pptx(pptx_path):
-            print(f"Skip temporary PowerPoint lock file: {pptx_path.name}")
+            print(f"跳过 PowerPoint 临时锁文件：{pptx_path.name}")
             continue
 
-        destination_dir = output_dir_for(pptx_path, output_base, multi_input)
-        slide_count, extracted_count = extract_pptx(
-            pptx_path,
-            destination_dir,
-            media_only=args.media_only,
-            with_text=args.with_text,
-            overwrite=args.overwrite,
-        )
+        destination_dir = output_dir_for(pptx_path, args.output, multi_input).resolve()
+        try:
+            slide_count, extracted_count = extract_pptx(
+                pptx_path,
+                destination_dir,
+                media_only=args.media_only,
+                with_text=args.with_text,
+                overwrite=args.overwrite,
+            )
+        except (OSError, ValueError, zipfile.BadZipFile) as exc:
+            failure_count += 1
+            print(f"提取失败：{pptx_path} -> {exc}", file=sys.stderr)
+            continue
+
+        success_count += 1
+        output_dirs.append(destination_dir)
         print(
             f"{pptx_path.name}: {slide_count} slides, "
             f"{extracted_count} files -> {destination_dir}"
         )
 
-    if args.output.expanduser().is_absolute():
-        print(f"提醒：主输出文件夹在这里：{output_base}")
-    else:
-        print(f"提醒：在当前文件夹可以找到主文件夹：{args.output}")
+    if output_dirs:
+        unique_output_dirs = list(dict.fromkeys(output_dirs))
+        if len(unique_output_dirs) == 1:
+            print(f"提醒：输出文件夹在这里：{unique_output_dirs[0]}")
+        else:
+            print("提醒：输出文件夹在这里：")
+            for output_dir in unique_output_dirs:
+                print(f"  - {output_dir}")
 
-    return 0
+    if success_count == 0:
+        return 1
+
+    return 1 if failure_count else 0
 
 
 if __name__ == "__main__":

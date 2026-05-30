@@ -24,79 +24,45 @@
 
 ---
 
-## 🚀 快速开始 / Quick Start
+## 运行方式 / Runtime
 
-### macOS
+本工具的核心逻辑位于 [extract_pptx_elements.py](extract_pptx_elements.py)。macOS 和 Windows 启动器会调用同一套 Python 逻辑，便于在未配置项目环境的终端用户机器上直接运行。项目不依赖第三方 Python 包，不需要虚拟环境或 `pip install`。
+> The core extraction logic lives in [extract_pptx_elements.py](extract_pptx_elements.py). The macOS and Windows launchers invoke the same Python logic, allowing direct execution on end-user machines without project setup. No third-party Python packages, virtual environment, or `pip install` step is required.
 
-[extract_pptx_elements.command](extract_pptx_elements.command) 是一个独立文件，内嵌完整 Python 源码，双击即可运行。**兼容 Intel 和 Apple Silicon Mac**，只需系统自带 Python 3。
-> [extract_pptx_elements.command](extract_pptx_elements.command) is a single self-contained file. Double-click to run. **Works on Intel and Apple Silicon Macs** with system Python 3.
+### macOS：`extract_pptx_elements.command`
+
+[extract_pptx_elements.command](extract_pptx_elements.command) 是 macOS 启动入口，文件内嵌完整 Python 源码。运行时会将内嵌源码写入临时 Python 文件，并使用系统中的 `python3` 执行。
+> [extract_pptx_elements.command](extract_pptx_elements.command) is the macOS entry point. It embeds the full Python source, writes it to a temporary Python file at runtime, and executes it with the system `python3`.
 
 1. 双击 `extract_pptx_elements.command`
 2. 若提示「无法验证开发者」→ 右键点击 → **打开** → 确认
 3. 将 `.pptx` 文件拖入窗口，按回车
-4. 结果保存在 `pptx_extracted_elements/` 目录
+4. 结果保存在 PPTX 文件旁边的 `pptx_extracted_elements/` 目录
 
 ```bash
 # 或终端运行 / Or run in terminal
 ./extract_pptx_elements.command presentation.pptx
 ```
 
-### Windows
+### Windows：`extract_pptx_elements.cmd`
 
-需将 `extract_pptx_elements.cmd` 与 `extract_pptx_elements.py` 放在同一目录，双击 `.cmd` 运行。或自行编译 `.exe`。
-> Place `extract_pptx_elements.cmd` and `extract_pptx_elements.py` in the same folder, double-click `.cmd`. Or build `.exe`.
-
-```cmd
-extract_pptx_elements.cmd presentation.pptx
-```
-
----
-
-## 预编译二进制（可选）/ Standalone Binaries (Optional)
-
-不需要，上面的 `.command` 文件已经够用了。以下仅作备选：
-> The `.command` file above is all you need. These are optional alternatives:
-
-| 平台 / Platform | 文件 / File |
-|----------|------|
-| **macOS** (Apple Silicon / M1-M3) | [`dist/extract_pptx_elements`](dist/extract_pptx_elements) |
-| **macOS** (Intel) | 请双击 `.command` 启动器（自动用 Python 源码）或自行编译 |
-| **Windows** (x64) | 在 Windows 上运行 `scripts\build_windows.bat` 编译 / Build via `scripts\build_windows.bat` on Windows |
-
-### macOS
-
-```bash
-# 终端运行 / Terminal
-./extract_pptx_elements.command presentation.pptx
-
-# 或直接用二进制 / Or binary directly (Apple Silicon only)
-./dist/extract_pptx_elements presentation.pptx
-```
-
-### Windows
+[extract_pptx_elements.cmd](extract_pptx_elements.cmd) 是 Windows 启动入口，文件内嵌完整 Python 源码。运行时会从 `.cmd` 中提取内嵌源码到临时 Python 文件，并依次尝试使用 `py -3`、`python` 或 `python3` 执行。
+> [extract_pptx_elements.cmd](extract_pptx_elements.cmd) is the Windows entry point. It extracts the embedded Python source to a temporary Python file, then attempts to run it with `py -3`, `python`, or `python3`.
 
 ```cmd
 extract_pptx_elements.cmd presentation.pptx
 ```
 
+Windows 环境需要已安装 Python 3 解释器；除此之外不需要配置项目环境或安装第三方依赖。如果目标机器完全没有 Python，可安装 Python 3，或使用发布包中的 `.exe`。
+> Windows requires a Python 3 interpreter, but no project setup or third-party dependencies. If the target machine has no Python installed, install Python 3 or use the packaged `.exe` from a release.
+
 ---
 
-## 环境要求（Python 版）/ Requirements (Python Version)
+## 环境要求 / Requirements
 
 - Python 3.8+
 - 无需第三方依赖（仅使用标准库：`zipfile`、`xml.etree`、`argparse`、`csv`）
 - No third-party dependencies (stdlib only)
-
-## 安装（Python 版）/ Installation (Python)
-
-```bash
-# 克隆仓库 / Clone the repository
-git clone https://github.com/mianouioui/extract_pptx_elements.git
-cd extract_pptx_elements
-
-# 赋予执行权限（可选）/ Make the script executable (optional)
-chmod +x extract_pptx_elements.py
-```
 
 ---
 
@@ -121,6 +87,9 @@ python3 extract_pptx_elements.py presentation.pptx --overwrite
 # 处理当前目录下所有 .pptx 文件 / Process all .pptx files in current directory
 python3 extract_pptx_elements.py
 ```
+
+默认情况下，输出目录会创建在 PPTX 文件旁边：`pptx_extracted_elements/`。如果一次处理多个文件，每个 PPTX 会有独立子目录，避免文件混在一起。
+> By default, the output folder is created next to the PPTX file: `pptx_extracted_elements/`. Multiple input files get separate subfolders.
 
 ---
 
@@ -183,34 +152,15 @@ PowerPoint `.pptx` 文件本质上是一个包含 XML 和媒体文件的 ZIP 压
 
 ---
 
-## 构建独立可执行文件 / Build Standalone Executables
+## 关于 scripts 目录 / About `scripts/`
 
-可将脚本编译为无需 Python 环境的独立二进制文件。启动器（`.command`/`.cmd`）已能覆盖绝大多数场景，以下为进阶用法。
-> Build a self-contained binary that runs without Python. The `.command`/`.cmd` launchers cover most use cases already.
+`scripts/` 已移除。原目录只包含 PyInstaller 打包脚本，不属于软件运行路径，也不是终端用户执行本工具所需内容。当前推荐运行入口是：
 
-### macOS
+- macOS: `extract_pptx_elements.command`
+- Windows: `extract_pptx_elements.cmd`
 
-```bash
-pip3 install pyinstaller
-
-# Apple Silicon (M1/M2/M3)
-./scripts/build_macos.sh
-
-# Intel Mac（在 Intel Mac 上运行）
-./scripts/build_macos.sh
-
-# 或在 Apple Silicon 上编译通用二进制（同时支持 Intel + ARM）
-pyinstaller --onefile --name extract_pptx_elements --specpath build/specs --target-arch universal2 extract_pptx_elements.py
-```
-
-### Windows
-
-```cmd
-pip install pyinstaller
-scripts\build_windows.bat
-```
-
-> **注意 / Note:** PyInstaller 只能在当前操作系统下编译，跨平台编译需分别执行。Intel Mac 用户直接用 `.command` 启动器即可，无需编译。
+如果维护者需要重新打包 `.exe` 或二进制文件，可在对应系统上直接运行 PyInstaller 命令；该流程属于发布构建流程，不影响启动器的日常运行。
+> `scripts/` has been removed because it only contained optional PyInstaller build helpers. Runtime entry points are the `.command` and `.cmd` launchers; binary packaging remains a separate release workflow.
 
 ---
 
