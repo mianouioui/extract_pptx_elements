@@ -1,6 +1,6 @@
 # PPTX 内容提取器 / PPTX Content Extractor
 
-[English Documentation](#english-documentation)
+[English Documentation](#english-documentation) | [Documentation française](#documentation-française)
 
 ## 中文说明
 
@@ -333,5 +333,173 @@ Recommended runtime entry points:
 If maintainers need to build an `.exe` or binary package, they can run PyInstaller directly on the target operating system. That process belongs to release packaging and does not affect everyday launcher usage.
 
 ### License
+
+MIT
+
+---
+
+## Documentation française
+
+### Extracteur de contenu PPTX
+
+`extract_pptx_elements` extrait les ressources d’un fichier PowerPoint `.pptx` au niveau de chaque diapositive, notamment les images, les vidéos, les fichiers audio, les graphiques, les diagrammes, les fichiers intégrés et, en option, le texte visible des diapositives. Les fichiers extraits sont classés dans des dossiers de type en chinois et nommés avec un préfixe correspondant au numéro de la diapositive, afin de faciliter le suivi de leur origine.
+
+### Fonctionnalités
+
+| Type | Contenu pris en charge |
+|------|------------------------|
+| Images | JPG, PNG, GIF, SVG, BMP, EMF, WMF, TIFF, WebP, JFIF |
+| Vidéos | MP4, AVI, MOV, MKV, WebM, WMV, etc. |
+| Audio | MP3, WAV, AAC, M4A, OGG, MIDI, WMA, etc. |
+| Graphiques | XML du graphique, définitions de style et de couleurs |
+| Diagrammes | XML des diagrammes SmartArt |
+| Objets intégrés | PDF, DOCX, XLSX, ZIP, etc. |
+| Texte des diapositives | Export en texte brut avec `--with-text` |
+| Manifeste | Génération automatique de `manifest.csv` avec la correspondance des sources |
+
+Exemples de noms de sortie : `图片/001_JPG.jpg`, `视频/002_MP4.mp4` et `图表/003_CHART.xml`. Le préfixe à trois chiffres correspond au numéro de la diapositive. Lorsque plusieurs ressources du même type existent sur une même diapositive, des suffixes comme `_02` et `_03` sont ajoutés automatiquement.
+
+### Points d’entrée
+
+Le projet fournit trois points d’entrée :
+
+- Script Python source : `extract_pptx_elements.py`
+- Lanceur macOS en fichier unique : `extract_pptx_elements.command`
+- Lanceur Windows PowerShell en fichier unique : `extract_pptx_elements.cmd`
+
+### Prérequis
+
+| Point d’entrée | Prérequis |
+|----------------|-----------|
+| `extract_pptx_elements.py` | Python 3.8+ |
+| `extract_pptx_elements.command` | macOS + Python 3 |
+| `extract_pptx_elements.cmd` | Windows PowerShell 5.1+ et API .NET ZIP/XML intégrées |
+
+Aucun paquet Python tiers ni environnement virtuel n’est nécessaire. Le point d’entrée Windows `.cmd` ne nécessite ni Python ni fichier `.exe`.
+
+### Utilisation sur macOS
+
+`extract_pptx_elements.command` contient le code source Python complet. À l’exécution, il écrit ce code intégré dans un fichier Python temporaire, puis l’exécute avec le `python3` du système.
+
+1. Double-cliquez sur `extract_pptx_elements.command`
+2. Si macOS affiche un avertissement concernant un développeur non identifié, faites un clic droit sur le fichier, choisissez Ouvrir, puis confirmez
+3. Glissez un fichier `.pptx` dans la fenêtre du terminal, puis appuyez sur Entrée
+4. Les fichiers extraits sont écrits à côté du fichier PPTX, dans `pptx_extracted_elements/`
+
+Utilisation dans le terminal :
+
+```bash
+./extract_pptx_elements.command presentation.pptx
+```
+
+### Utilisation sur Windows
+
+`extract_pptx_elements.cmd` contient toute la logique d’extraction PowerShell. À l’exécution, il appelle `powershell.exe`, lit la section PowerShell intégrée dans le fichier `.cmd`, puis l’exécute directement.
+
+```cmd
+extract_pptx_elements.cmd presentation.pptx
+```
+
+Le point d’entrée Windows prend en charge les mêmes options courantes que le script Python :
+
+```cmd
+extract_pptx_elements.cmd presentation.pptx --with-text
+extract_pptx_elements.cmd presentation.pptx --media-only
+extract_pptx_elements.cmd presentation.pptx --overwrite
+extract_pptx_elements.cmd presentation.pptx -o my_assets
+```
+
+### Utilisation du script Python
+
+```bash
+# Extraire toutes les ressources prises en charge depuis un fichier PPTX
+python3 extract_pptx_elements.py presentation.pptx
+
+# Extraire vers un dossier de sortie personnalisé
+python3 extract_pptx_elements.py presentation.pptx -o my_assets
+
+# Extraire uniquement les images, les vidéos et l’audio
+python3 extract_pptx_elements.py presentation.pptx --media-only
+
+# Exporter également le texte visible des diapositives
+python3 extract_pptx_elements.py presentation.pptx --with-text
+
+# Écraser les fichiers de sortie existants
+python3 extract_pptx_elements.py presentation.pptx --overwrite
+
+# Traiter tous les fichiers .pptx non temporaires du dossier courant
+python3 extract_pptx_elements.py
+```
+
+Par défaut, le dossier de sortie est créé à côté du fichier PPTX et porte le nom `pptx_extracted_elements/`. Lorsque plusieurs fichiers PPTX sont traités en une seule fois, chaque fichier reçoit son propre sous-dossier.
+
+### Structure de sortie
+
+```text
+pptx_extracted_elements/
+├── 图片/
+│   ├── 001_JPG.jpg
+│   ├── 001_JPG_02.jpg
+│   └── 002_PNG.png
+├── 视频/
+│   └── 002_MP4.mp4
+├── 图表/
+│   └── 003_CHART.xml
+├── 文本/
+│   └── 003_TXT.txt
+└── manifest.csv
+```
+
+Lors du traitement de plusieurs fichiers PPTX :
+
+```text
+pptx_extracted_elements/
+├── presentation1/
+│   ├── 图片/
+│   │   └── 001_JPG.jpg
+│   └── manifest.csv
+└── presentation2/
+    ├── 图片/
+    │   └── 001_PNG.png
+    └── manifest.csv
+```
+
+### Champs du fichier Manifest CSV
+
+| Champ | Description |
+|-------|-------------|
+| `slide` | Numéro de diapositive à trois chiffres |
+| `output_file` | Chemin relatif du fichier de sortie |
+| `kind` | Type de ressource, par exemple `image`, `video`, `audio`, `chart` ou `diagram` |
+| `source_part` | Partie XML interne du PPTX qui contient la relation |
+| `target_part` | Chemin interne de la ressource cible dans le PPTX |
+| `relationship_id` | Identifiant XML de la relation |
+| `relationship_type` | URI complète du type de relation |
+
+### Fonctionnement
+
+Un fichier PowerPoint `.pptx` est un paquet ZIP contenant des fichiers XML, des fichiers de relations et des ressources multimédias. Le processus d’extraction est le suivant :
+
+1. Ouvrir le fichier `.pptx` comme paquet ZIP
+2. Lire `ppt/presentation.xml` et ses relations pour déterminer l’ordre des diapositives
+3. Parcourir l’arbre des relations de chaque diapositive afin d’identifier les images, vidéos, fichiers audio, graphiques, diagrammes et objets intégrés
+4. Copier les ressources dans des dossiers de type en chinois
+5. Générer les noms de fichiers avec un préfixe basé sur le numéro de diapositive
+6. Extraire le texte visible lorsque `--with-text` est activé
+7. Écrire `manifest.csv` avec la correspondance des sources
+
+### À propos de `scripts/`
+
+Le dossier `scripts/` a été supprimé. Il ne contenait que des scripts optionnels de construction PyInstaller, qui ne font pas partie du chemin d’exécution et ne sont pas nécessaires pour l’utilisation finale.
+
+Points d’entrée recommandés :
+
+- Python : `extract_pptx_elements.py`
+- macOS : `extract_pptx_elements.command`
+- Windows : `extract_pptx_elements.cmd`
+
+Si les mainteneurs doivent générer un fichier `.exe` ou un paquet binaire, ils peuvent exécuter PyInstaller directement sur le système d’exploitation cible. Ce processus relève de la publication et n’affecte pas l’utilisation quotidienne des lanceurs.
+
+### Licence
 
 MIT
