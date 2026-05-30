@@ -53,6 +53,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero external dependencies (Python stdlib only)
 - Support for Python 3.8+
 
-[1.0.2]: https://github.com/yourusername/extract_pptx_elements/releases/tag/V1.0.2
-[1.0.1]: https://github.com/yourusername/extract_pptx_elements/releases/tag/V1.0.1
-[1.0.0]: https://github.com/yourusername/extract_pptx_elements/releases/tag/V1.0.0
+[1.0.2]: #
+[1.0.1]: #
+[1.0.0]: #
