@@ -1,7 +1,8 @@
 @echo off
-chcp 65001 >/dev/null
+set VERSION=V1.0.1
+chcp 65001 >nul
 REM ============================================================
-REM  PPTX 元素提取工具 - Windows 启动器
+REM  PPTX 元素提取工具 %VERSION% - Windows 启动器
 REM  直接双击即可运行
 REM ============================================================
 
@@ -9,7 +10,7 @@ cd /d "%~dp0"
 
 if "%~1"=="" (
     echo ╔══════════════════════════════════════════╗
-    echo ║     PPTX 元素提取工具 V1.0.0            ║
+    echo ║     PPTX 元素提取工具 %VERSION%            ║
     echo ║     extract_pptx_elements               ║
     echo ╚══════════════════════════════════════════╝
     echo.

@@ -1,10 +1,11 @@
 #!/bin/bash
 # ============================================================
-#  PPTX 元素提取工具 V1.0.0 - macOS 独立启动器
-#  只需要把这一个文件发给你女朋友，双击即可运行！
-#  兼容 Intel 和 Apple Silicon Mac，无需安装任何东西。
+#  PPTX 元素提取工具 - macOS 独立启动器
+#  双击即可运行，兼容 Intel 和 Apple Silicon Mac
 # ============================================================
 set -e
+
+VERSION="V1.0.1"
 
 LAUNCHER_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$LAUNCHER_DIR"
@@ -31,7 +32,7 @@ PYTHON="$(command -v python3)"
 # -------- 交互式提示（无参数时）--------
 if [ $# -eq 0 ]; then
     echo "╔══════════════════════════════════════════╗"
-    echo "║     PPTX 元素提取工具 V1.0.0            ║"
+    echo "║     PPTX 元素提取工具 $VERSION           ║"
     echo "║     extract_pptx_elements               ║"
     echo "╚══════════════════════════════════════════╝"
     echo ""
