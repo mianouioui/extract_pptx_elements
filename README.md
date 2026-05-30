@@ -23,22 +23,34 @@
 
 ## 🚀 一键启动（推荐 / Recommended）
 
-双击以下文件即可运行，**自动适配**有/无 Python 环境，**兼容 Intel 和 Apple Silicon Mac**：
-> Double-click to launch. Automatically adapts to systems with or without Python. **Works on both Intel and Apple Silicon Macs.**
+**只需一个文件**——发给别人就能用，**兼容 Intel 和 Apple Silicon Mac**。Python 代码已内嵌，只要 Mac 有 Python 3 即可运行（macOS 通常自带）。
+> **Just one file** — send it and it works. Python code is embedded inside. **Compatible with both Intel and Apple Silicon Macs** as long as Python 3 is available (usually pre-installed on macOS).
 
-| 平台 / Platform | 启动文件 / Launcher | 说明 |
+| 平台 / Platform | 文件 / File | 说明 |
 |----------|------|------|
-| **macOS** | [extract_pptx_elements.command](extract_pptx_elements.command) | 双击打开终端运行；有 Python 用源码，无 Python 用二进制 |
-| **Windows** | [extract_pptx_elements.cmd](extract_pptx_elements.cmd) | 双击打开命令提示符运行；自动选择 Python 或 exe |
+| **macOS** | [extract_pptx_elements.command](extract_pptx_elements.command) | **📎 就发这一个**。双击运行，代码内嵌，无需其他文件 |
+| **Windows** | [extract_pptx_elements.cmd](extract_pptx_elements.cmd) | 双击运行，需同目录下有 `.py` 文件 |
 
-> **Intel Mac 用户**：双击 `.command` 文件即可。只要系统有 Python 3（macOS 通常自带），就能正常运行。预编译二进制仅限 Apple Silicon，但启动脚本会自动切换。
+### 🎁 发给你女朋友
+
+```
+只需发送: extract_pptx_elements.command  ← 一个文件就够了！
+```
+
+她收到后：
+1. 如果系统提示「无法打开来自未知开发者的程序」→ 右键点击文件 → **打开** → 确认
+2. 双击 `extract_pptx_elements.command`
+3. 将 `.pptx` 文件拖入窗口，按回车
+4. 提取结果保存在同目录的 `pptx_extracted_elements/` 文件夹中
+
+> **Intel Mac 用户**：`.command` 内嵌完整 Python 源码，只要系统有 Python 3（macOS 通常自带），就能正常运行。不需要预编译二进制。
 
 ---
 
-## 无需 Python 环境也可使用 / Quick Start — No Python Required
+## 预编译二进制（可选）/ Standalone Binaries (Optional)
 
-如果不想装 Python，也可直接使用预编译二进制：
-> Pre-built standalone binaries available:
+不需要，上面的 `.command` 文件已经够用了。以下仅作备选：
+> The `.command` file above is all you need. These are optional alternatives:
 
 | 平台 / Platform | 文件 / File |
 |----------|------|
