@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions
-set "VERSION=V1.1.2"
+set "VERSION=V1.1.3"
 set "PPTX_EXTRACTOR_SCRIPT=%~f0"
 set "PPTX_EXTRACTOR_PY_TEMP=%TEMP%\extract_pptx_elements_py_%RANDOM%%RANDOM%.py"
 set "PPTX_EXTRACTOR_PS_TEMP=%TEMP%\extract_pptx_elements_ps_%RANDOM%%RANDOM%.ps1"
@@ -122,7 +122,7 @@ param([string[]]$LauncherArgs)
 
 $ErrorActionPreference = "Stop"
 
-$Version = "V1.1.2"
+$Version = "V1.1.3"
 $DefaultOutputDirName = "pptx_extracted_elements"
 
 $PackageRelsNs = "http://schemas.openxmlformats.org/package/2006/relationships"
@@ -976,7 +976,7 @@ PRESENTATION_NS = "http://schemas.openxmlformats.org/presentationml/2006/main"
 OFFICE_RELS_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 DRAWING_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
 
-VERSION = "1.1.2"
+VERSION = "1.1.3"
 DEFAULT_OUTPUT_DIR_NAME = "pptx_extracted_elements"
 
 IMAGE_EXTS = {
