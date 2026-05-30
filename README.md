@@ -21,31 +21,45 @@
 
 ---
 
-## 无需 Python 环境即可使用 / Quick Start — No Python Required
+## 🚀 一键启动（推荐 / Recommended）
 
-`dist/` 目录下提供了预编译的独立可执行文件：
-> Pre-built standalone executables are in the [`dist/`](dist/) folder:
+双击以下文件即可运行，**自动适配**有/无 Python 环境，**兼容 Intel 和 Apple Silicon Mac**：
+> Double-click to launch. Automatically adapts to systems with or without Python. **Works on both Intel and Apple Silicon Macs.**
+
+| 平台 / Platform | 启动文件 / Launcher | 说明 |
+|----------|------|------|
+| **macOS** | [extract_pptx_elements.command](extract_pptx_elements.command) | 双击打开终端运行；有 Python 用源码，无 Python 用二进制 |
+| **Windows** | [extract_pptx_elements.cmd](extract_pptx_elements.cmd) | 双击打开命令提示符运行；自动选择 Python 或 exe |
+
+> **Intel Mac 用户**：双击 `.command` 文件即可。只要系统有 Python 3（macOS 通常自带），就能正常运行。预编译二进制仅限 Apple Silicon，但启动脚本会自动切换。
+
+---
+
+## 无需 Python 环境也可使用 / Quick Start — No Python Required
+
+如果不想装 Python，也可直接使用预编译二进制：
+> Pre-built standalone binaries available:
 
 | 平台 / Platform | 文件 / File |
 |----------|------|
-| **macOS** (Apple Silicon) | [`dist/extract_pptx_elements`](dist/extract_pptx_elements) |
+| **macOS** (Apple Silicon / M1-M3) | [`dist/extract_pptx_elements`](dist/extract_pptx_elements) |
+| **macOS** (Intel) | 请双击 `.command` 启动器（自动用 Python 源码）或自行编译 |
 | **Windows** (x64) | 在 Windows 上运行 `build_windows.bat` 编译 / Build via `build_windows.bat` on Windows |
 
 ### macOS
 
 ```bash
-# 下载后直接运行 / Download and run directly
-./dist/extract_pptx_elements presentation.pptx
+# 终端运行 / Terminal
+./extract_pptx_elements.command presentation.pptx
 
-# 或安装到系统路径 / Or install system-wide
-cp dist/extract_pptx_elements /usr/local/bin/
-extract_pptx_elements presentation.pptx
+# 或直接用二进制 / Or binary directly (Apple Silicon only)
+./dist/extract_pptx_elements presentation.pptx
 ```
 
 ### Windows
 
 ```cmd
-dist\extract_pptx_elements.exe presentation.pptx
+extract_pptx_elements.cmd presentation.pptx
 ```
 
 ---
@@ -148,15 +162,22 @@ PowerPoint `.pptx` 文件本质上是一个包含 XML 和媒体文件的 ZIP 压
 
 ## 构建独立可执行文件 / Build Standalone Executables
 
-可将脚本编译为无需 Python 环境的独立二进制文件：
-> Build a self-contained binary that runs without Python:
+可将脚本编译为无需 Python 环境的独立二进制文件。启动器（`.command`/`.cmd`）已能覆盖绝大多数场景，以下为进阶用法。
+> Build a self-contained binary that runs without Python. The `.command`/`.cmd` launchers cover most use cases already.
 
 ### macOS
 
 ```bash
 pip3 install pyinstaller
+
+# Apple Silicon (M1/M2/M3)
 ./build_macos.sh
-# 输出 / Binary at: dist/extract_pptx_elements
+
+# Intel Mac（在 Intel Mac 上运行）
+./build_macos.sh
+
+# 或在 Apple Silicon 上编译通用二进制（同时支持 Intel + ARM）
+pyinstaller --onefile --name extract_pptx_elements --target-arch universal2 extract_pptx_elements.py
 ```
 
 ### Windows
@@ -164,11 +185,9 @@ pip3 install pyinstaller
 ```cmd
 pip install pyinstaller
 build_windows.bat
-REM 输出 / Binary at: dist\extract_pptx_elements.exe
 ```
 
-> **注意 / Note:** PyInstaller 只能在当前操作系统下编译对应平台的二进制文件，需分别在 macOS 和 Windows 上执行。
-> PyInstaller can only build for the current OS. Build on each platform separately.
+> **注意 / Note:** PyInstaller 只能在当前操作系统下编译，跨平台编译需分别执行。Intel Mac 用户直接用 `.command` 启动器即可，无需编译。
 
 ---
 
