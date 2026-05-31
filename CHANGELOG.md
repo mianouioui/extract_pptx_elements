@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-05-31
+
+### Added
+
+- `restore_pptx_elements.py`: new companion tool that writes extracted (and edited) media back into a copy of the original `.pptx`. Because it only swaps media bytes and never touches any XML, every element keeps its exact original position — a strict guarantee for images. It reads `manifest.csv` to map each file to its internal part, and auto-detects both the extracted folder and the original PPTX.
+- `restore_pptx_elements.command`: macOS single-file launcher with embedded Python. Double-click it next to the extracted folder for a true one-click restore, or drag the folder onto the window.
+- `restore_pptx_elements.cmd`: Windows single-file launcher, mirroring the extractor's entry point — embedded Python preferred, with an embedded PowerShell 5.1+ fallback so no Python install is required.
+- Restore options: `--images-only`, `--media-only`, `--pptx`, `-o/--output`, `--overwrite`, `--dry-run`. An image shared across slides resolves to the edited copy, assets identical to the original are skipped, and pointing at the wrong original PPTX is detected without writing a file.
+
+### Changed
+
+- Bumped the whole project to 1.2.0 (extractor `.py` / `.command` / `.cmd`) for a cohesive release. The extractor's behavior is unchanged.
+
+### Notes
+
+- The restore PowerShell fallback in `restore_pptx_elements.cmd` is new (ported from the validated Python logic) and should be verified on a real Windows machine before relying on it for important decks. Restore never modifies the original PPTX — it always writes a separate `_restored.pptx` — so the worst case of an untested path is an unusable output file, never a lost original.
+
 ## [1.1.4] - 2026-05-31
 
 ### Changed
@@ -108,6 +125,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero external dependencies (Python stdlib only)
 - Support for Python 3.8+
 
+[1.2.0]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.2.0
 [1.1.4]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.1.4
 [1.1.3]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.1.3
 [1.1.2]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.1.2

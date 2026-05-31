@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-#  PPTX 内容提取器 V1.1.4 - macOS 单文件启动器
+#  PPTX 内容提取器 V1.2.0 - macOS 单文件启动器
 #  双击即可运行，兼容 Intel 和 Apple Silicon Mac
 # ============================================================
 
@@ -8,7 +8,7 @@
 chmod +x "$0" >/dev/null 2>&1 || true
 xattr -d com.apple.quarantine "$0" >/dev/null 2>&1 || true
 
-VERSION="V1.1.4"
+VERSION="V1.2.0"
 LAUNCHER_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$LAUNCHER_DIR" || exit 1
 
@@ -118,7 +118,7 @@ PRESENTATION_NS = "http://schemas.openxmlformats.org/presentationml/2006/main"
 OFFICE_RELS_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 DRAWING_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
 
-VERSION = "1.1.4"
+VERSION = "1.2.0"
 DEFAULT_OUTPUT_DIR_NAME = "pptx_extracted_elements"
 
 IMAGE_EXTS = {
