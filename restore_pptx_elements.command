@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-#  PPTX 元素还原器 V1.2.0 - macOS 单文件启动器
+#  PPTX 元素还原器 V1.2.1 - macOS 单文件启动器
 #  双击即可运行，兼容 Intel 和 Apple Silicon Mac
 #  用法：把本文件放在“原始 PPTX”和“pptx_extracted_elements”
 #        文件夹旁边，双击即可一键把修好的图片写回 PPTX。
@@ -10,7 +10,7 @@
 chmod +x "$0" >/dev/null 2>&1 || true
 xattr -d com.apple.quarantine "$0" >/dev/null 2>&1 || true
 
-VERSION="V1.2.0"
+VERSION="V1.2.1"
 LAUNCHER_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$LAUNCHER_DIR" || exit 1
 
@@ -129,7 +129,7 @@ from pathlib import Path, PurePosixPath
 from typing import Iterable
 
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 
 MANIFEST_NAME = "manifest.csv"
 DEFAULT_EXTRACT_DIR_NAME = "pptx_extracted_elements"

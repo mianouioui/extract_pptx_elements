@@ -1,12 +1,12 @@
 @echo off
 setlocal EnableExtensions
-set "VERSION=V1.2.0"
+set "VERSION=V1.2.1"
 set "PPTX_EXTRACTOR_SCRIPT=%~f0"
 set "PPTX_EXTRACTOR_PY_TEMP=%TEMP%\extract_pptx_elements_py_%RANDOM%%RANDOM%.py"
 set "PPTX_EXTRACTOR_PS_TEMP=%TEMP%\extract_pptx_elements_ps_%RANDOM%%RANDOM%.ps1"
 chcp 65001 >nul
 REM ============================================================
-REM  PPTX 内容提取器 %VERSION% - Windows 单文件启动器
+REM  PPTX 元素提取器 %VERSION% - Windows 单文件启动器
 REM  直接双击或拖拽 .pptx 到本文件即可运行
 REM ============================================================
 
@@ -122,7 +122,7 @@ param([string[]]$LauncherArgs)
 
 $ErrorActionPreference = "Stop"
 
-$Version = "V1.2.0"
+$Version = "V1.2.1"
 $DefaultOutputDirName = "pptx_extracted_elements"
 
 $PackageRelsNs = "http://schemas.openxmlformats.org/package/2006/relationships"
@@ -162,7 +162,7 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 function Show-Banner {
     Write-Host "╔══════════════════════════════════════════╗"
-    Write-Host "║     PPTX 内容提取器 $Version           ║"
+    Write-Host "║     PPTX 元素提取器 $Version           ║"
     Write-Host "║     extract_pptx_elements               ║"
     Write-Host "╚══════════════════════════════════════════╝"
     Write-Host ""
@@ -921,7 +921,7 @@ exit (Main -Argv $LauncherArgs)
 # PYTHON_CODE_BELOW
 #!/usr/bin/env python3
 """
-PPTX 内容提取器 - Extract slide-level resources from PowerPoint .pptx files.
+PPTX 元素提取器 - Extract slide-level resources from PowerPoint .pptx files.
 
 Examples:
   python3 extract_pptx_elements.py "deck.pptx"
@@ -954,7 +954,7 @@ PRESENTATION_NS = "http://schemas.openxmlformats.org/presentationml/2006/main"
 OFFICE_RELS_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 DRAWING_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 DEFAULT_OUTPUT_DIR_NAME = "pptx_extracted_elements"
 
 IMAGE_EXTS = {
@@ -1063,7 +1063,7 @@ class Resource:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "PPTX 内容提取器 - Extract images, videos, audio, embedded files, charts, "
+            "PPTX 元素提取器 - Extract images, videos, audio, embedded files, charts, "
             "and diagrams from .pptx files into Chinese type folders using "
             "slide-number-based names."
         )

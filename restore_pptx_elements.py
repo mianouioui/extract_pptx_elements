@@ -38,7 +38,7 @@ from pathlib import Path, PurePosixPath
 from typing import Iterable
 
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 
 MANIFEST_NAME = "manifest.csv"
 DEFAULT_EXTRACT_DIR_NAME = "pptx_extracted_elements"

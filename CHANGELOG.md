@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-05-31
+
+### Changed
+
+- Renamed the extractor from `PPTX 内容提取器` to `PPTX 元素提取器` (English `PPTX Content Extractor` → `PPTX Element Extractor`) across all entry points and the README.
+- Gave the restorer a consistent `PPTX 元素还原器` / `PPTX Element Restorer` name in the README (the launchers already used it).
+- Updated the README title to `PPTX 元素提取与还原器 / PPTX Element Extractor & Restorer`.
+- Bumped all entry points (`extract_*` and `restore_*` `.py` / `.command` / `.cmd`) to 1.2.1.
+
 ## [1.2.0] - 2026-05-31
 
 ### Added
@@ -125,6 +134,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero external dependencies (Python stdlib only)
 - Support for Python 3.8+
 
+[1.2.1]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.2.1
 [1.2.0]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.2.0
 [1.1.4]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.1.4
 [1.1.3]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.1.3

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-#  PPTX 内容提取器 V1.2.0 - macOS 单文件启动器
+#  PPTX 元素提取器 V1.2.1 - macOS 单文件启动器
 #  双击即可运行，兼容 Intel 和 Apple Silicon Mac
 # ============================================================
 
@@ -8,7 +8,7 @@
 chmod +x "$0" >/dev/null 2>&1 || true
 xattr -d com.apple.quarantine "$0" >/dev/null 2>&1 || true
 
-VERSION="V1.2.0"
+VERSION="V1.2.1"
 LAUNCHER_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$LAUNCHER_DIR" || exit 1
 
@@ -34,7 +34,7 @@ fi
 
 if [ $# -eq 0 ]; then
     echo "╔══════════════════════════════════════════╗"
-    echo "║     PPTX 内容提取器 $VERSION           ║"
+    echo "║     PPTX 元素提取器 $VERSION           ║"
     echo "║     extract_pptx_elements               ║"
     echo "╚══════════════════════════════════════════╝"
     echo ""
@@ -85,7 +85,7 @@ exit $EXIT_CODE
 # ---PYTHON_CODE_BELOW---
 #!/usr/bin/env python3
 """
-PPTX 内容提取器 - Extract slide-level resources from PowerPoint .pptx files.
+PPTX 元素提取器 - Extract slide-level resources from PowerPoint .pptx files.
 
 Examples:
   python3 extract_pptx_elements.py "deck.pptx"
@@ -118,7 +118,7 @@ PRESENTATION_NS = "http://schemas.openxmlformats.org/presentationml/2006/main"
 OFFICE_RELS_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 DRAWING_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 DEFAULT_OUTPUT_DIR_NAME = "pptx_extracted_elements"
 
 IMAGE_EXTS = {
@@ -227,7 +227,7 @@ class Resource:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "PPTX 内容提取器 - Extract images, videos, audio, embedded files, charts, "
+            "PPTX 元素提取器 - Extract images, videos, audio, embedded files, charts, "
             "and diagrams from .pptx files into Chinese type folders using "
             "slide-number-based names."
         )

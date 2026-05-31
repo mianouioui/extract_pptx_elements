@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions
-set "VERSION=V1.2.0"
+set "VERSION=V1.2.1"
 set "RESTORE_SCRIPT=%~f0"
 set "RESTORE_PY_TEMP=%TEMP%\restore_pptx_elements_py_%RANDOM%%RANDOM%.py"
 set "RESTORE_PS_TEMP=%TEMP%\restore_pptx_elements_ps_%RANDOM%%RANDOM%.ps1"
@@ -137,7 +137,7 @@ param([string[]]$LauncherArgs)
 
 $ErrorActionPreference = "Stop"
 
-$Version = "V1.2.0"
+$Version = "V1.2.1"
 $ManifestName = "manifest.csv"
 $DefaultExtractDirName = "pptx_extracted_elements"
 $DefaultOutputSuffix = "_restored"
@@ -654,7 +654,7 @@ from pathlib import Path, PurePosixPath
 from typing import Iterable
 
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 
 MANIFEST_NAME = "manifest.csv"
 DEFAULT_EXTRACT_DIR_NAME = "pptx_extracted_elements"
