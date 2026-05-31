@@ -472,9 +472,11 @@ MIT
 
 ## Documentation française
 
-### Extracteur de contenu PPTX
+### Extracteur d’éléments PPTX
 
 `extract_pptx_elements` extrait les ressources d’un fichier PowerPoint `.pptx` au niveau de chaque diapositive, notamment les images, les vidéos, les fichiers audio, les graphiques, les diagrammes, les fichiers intégrés et, en option, le texte visible des diapositives. Les fichiers extraits sont classés dans des dossiers de type en chinois et nommés avec un préfixe correspondant au numéro de la diapositive, afin de faciliter le suivi de leur origine.
+
+Depuis la V1.2.0, l’outil compagnon `restore_pptx_elements` réécrit les médias modifiés (par exemple après un nettoyage de filigrane par lot) dans le PPTX en un clic, **en conservant chaque élément à sa position d’origine**. Voir [Restaurateur d’éléments PPTX](#restaurateur-déléments-pptx-restore_pptx_elements) ci-dessous.
 
 ### Fonctionnalités
 
@@ -633,6 +635,64 @@ Points d’entrée recommandés :
 - Windows : `extract_pptx_elements.cmd`
 
 Si les mainteneurs doivent générer un fichier `.exe` ou un paquet binaire, ils peuvent exécuter PyInstaller directement sur le système d’exploitation cible. Ce processus relève de la publication et n’affecte pas l’utilisation quotidienne des lanceurs.
+
+### Restaurateur d’éléments PPTX (restore_pptx_elements)
+
+`restore_pptx_elements` est le compagnon de l’extracteur : il réécrit les médias extraits (et éventuellement modifiés) dans le PPTX, à leur emplacement d’origine. Le cas d’usage typique est la retouche par lot des images — par exemple le retrait d’un filigrane — puis la reconstruction en un clic d’un nouveau PPTX dont la mise en page est identique à l’original.
+
+**Pourquoi les positions ne changent jamais** : la position et la taille d’un élément sont stockées dans le XML de la diapositive (`<a:off>` / `<a:ext>`), pas dans les octets de l’image. Lors de la restauration, cet outil ne remplace que les octets de chaque média et ne touche jamais au moindre XML ; chaque élément conserve donc exactement sa position d’origine. C’est une garantie stricte pour les images, et elle se vérifie en pratique pour tous les autres éléments. Même si une image corrigée a une taille en pixels ou un format différent, sa position sur la diapositive ne change pas (PowerPoint la redimensionne dans le cadre de mise en page d’origine).
+
+**Déroulement** :
+
+1. Extraire d’abord : `extract_pptx_elements.py "deck.pptx"` → produit `pptx_extracted_elements/`
+2. Retoucher les images par lot dans `图片/` (en conservant les noms de fichiers)
+3. Restaurer : `restore_pptx_elements.py` → produit `deck_restored.pptx`
+
+Le restaurateur lit `manifest.csv` pour localiser la partie exacte de chaque image dans le PPTX et la réécrit dans une copie du fichier d’origine (l’original n’est jamais modifié).
+
+**Points d’entrée et prérequis** :
+
+| Point d’entrée | Prérequis |
+|----------------|-----------|
+| `restore_pptx_elements.py` | Python 3.8+ |
+| `restore_pptx_elements.command` | macOS + Python 3 |
+| `restore_pptx_elements.cmd` | Windows ; utilise Python 3 en priorité, puis bascule vers PowerShell 5.1+ intégré (sans Python) |
+
+**Utilisation sur macOS** : placez `restore_pptx_elements.command` à côté du PPTX d’origine et du dossier `pptx_extracted_elements/`, puis double-cliquez pour une restauration en un clic. Vous pouvez aussi glisser le dossier extrait dans la fenêtre.
+
+**Utilisation sur Windows** : placez `restore_pptx_elements.cmd` à côté du PPTX d’origine et du dossier `pptx_extracted_elements/`, puis double-cliquez pour une restauration en un clic ; vous pouvez aussi glisser le dossier extrait sur le `.cmd`. Comme l’extracteur, le `.cmd` intègre à la fois une implémentation Python (préférée) et une solution de secours PowerShell, sans installation supplémentaire.
+
+**Utilisation du script Python** :
+
+```bash
+# Exécuter à côté du dossier extrait ; détecte automatiquement les médias et le PPTX d’origine
+python3 restore_pptx_elements.py
+
+# Indiquer un dossier extrait précis
+python3 restore_pptx_elements.py pptx_extracted_elements
+
+# Indiquer le PPTX d’origine et le nom de sortie
+python3 restore_pptx_elements.py pptx_extracted_elements --pptx deck.pptx -o deck_fixed.pptx
+
+# Ne réécrire que les images, en laissant tous les autres éléments intacts
+python3 restore_pptx_elements.py --images-only
+
+# Aperçu sans écrire de fichier
+python3 restore_pptx_elements.py --dry-run
+```
+
+**Options courantes** :
+
+| Option | Description |
+|--------|-------------|
+| `--pptx FICHIER` | PPTX d’origine ; détecté automatiquement depuis le manifeste par défaut |
+| `-o FICHIER` | PPTX de sortie ; par défaut `<nom>_restored.pptx` |
+| `--images-only` | Ne réécrire que les images |
+| `--media-only` | Ne réécrire que les images, vidéos et fichiers audio |
+| `--overwrite` | Écraser un fichier de sortie existant |
+| `--dry-run` | Aperçu sans écriture |
+
+Le restaurateur ne remplace que les parties dont le contenu a réellement changé : les médias identiques à l’original sont ignorés, et pour une image partagée par plusieurs diapositives, il suffit d’en modifier une seule copie.
 
 ### Notes de version
 

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed the extractor from `PPTX 内容提取器` to `PPTX 元素提取器` (English `PPTX Content Extractor` → `PPTX Element Extractor`) across all entry points and the README.
 - Gave the restorer a consistent `PPTX 元素还原器` / `PPTX Element Restorer` name in the README (the launchers already used it).
 - Updated the README title to `PPTX 元素提取与还原器 / PPTX Element Extractor & Restorer`.
+- Aligned the French README section to the new naming (`Extracteur d'éléments PPTX`) and added a French restorer section (`Restaurateur d'éléments PPTX`).
 - Bumped all entry points (`extract_*` and `restore_*` `.py` / `.command` / `.cmd`) to 1.2.1.
 
 ## [1.2.0] - 2026-05-31
