@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions
-set "VERSION=V1.2.1"
+set "VERSION=V1.2.2"
 set "PPTX_EXTRACTOR_SCRIPT=%~f0"
 set "PPTX_EXTRACTOR_PY_TEMP=%TEMP%\extract_pptx_elements_py_%RANDOM%%RANDOM%.py"
 set "PPTX_EXTRACTOR_PS_TEMP=%TEMP%\extract_pptx_elements_ps_%RANDOM%%RANDOM%.ps1"
@@ -122,7 +122,7 @@ param([string[]]$LauncherArgs)
 
 $ErrorActionPreference = "Stop"
 
-$Version = "V1.2.1"
+$Version = "V1.2.2"
 $DefaultOutputDirName = "pptx_extracted_elements"
 
 $PackageRelsNs = "http://schemas.openxmlformats.org/package/2006/relationships"
@@ -138,10 +138,13 @@ $RelSkipWords = @(
     "/notesSlide",
     "/presProps",
     "/printerSettings",
-    "/slideLayout",
-    "/slideMaster",
     "/theme",
     "/viewProps"
+)
+
+$RelFollowWords = @(
+    "/slideLayout",
+    "/slideMaster"
 )
 
 $KindFolderNames = @{
@@ -525,6 +528,18 @@ function Should-ExtractKind {
     return @("audio", "chart", "chart_colors", "chart_style", "diagram", "embedded", "image", "ole", "video") -contains $Kind
 }
 
+function Should-FollowRelationship {
+    param([string]$RelType)
+
+    $lowerRelType = $RelType.ToLowerInvariant()
+    foreach ($word in $RelFollowWords) {
+        if ($lowerRelType.Contains($word.ToLowerInvariant())) {
+            return $true
+        }
+    }
+    return $false
+}
+
 function Collect-SlideResources {
     param(
         [object]$Zip,
@@ -535,6 +550,7 @@ function Collect-SlideResources {
 
     $resources = New-Object System.Collections.Generic.List[object]
     $seenTargets = New-Object System.Collections.Generic.HashSet[string]
+    $visitedSources = New-Object System.Collections.Generic.HashSet[string]
 
     function Walk-Relationships {
         param(
@@ -542,9 +558,10 @@ function Collect-SlideResources {
             [int]$Depth
         )
 
-        if ($Depth -gt 2) {
+        if ($Depth -gt 5 -or $visitedSources.Contains($SourcePart)) {
             return
         }
+        [void]$visitedSources.Add($SourcePart)
 
         foreach ($rel in (Get-Relationships $Zip $SourcePart)) {
             if ([string]::IsNullOrEmpty($rel.Target) -or $rel.TargetMode.ToLowerInvariant() -eq "external") {
@@ -572,6 +589,9 @@ function Collect-SlideResources {
             if (($kind -eq "chart" -or $kind -eq "diagram") -and -not $MediaOnly) {
                 Walk-Relationships $targetPart ($Depth + 1)
             }
+            elseif (Should-FollowRelationship $rel.Type) {
+                Walk-Relationships $targetPart ($Depth + 1)
+            }
         }
     }
 
@@ -590,16 +610,20 @@ function Get-SlideText {
         return ""
     }
 
-    $runs = New-Object System.Collections.Generic.List[string]
-    foreach ($node in $xml.GetElementsByTagName("t", $DrawingNs)) {
-        if ($node.InnerText) {
-            $text = $node.InnerText.Trim()
-            if ($text) {
-                $runs.Add($text) | Out-Null
+    $paragraphs = New-Object System.Collections.Generic.List[string]
+    foreach ($paragraph in $xml.GetElementsByTagName("p", $DrawingNs)) {
+        $builder = New-Object System.Text.StringBuilder
+        foreach ($node in $paragraph.GetElementsByTagName("t", $DrawingNs)) {
+            if ($node.InnerText) {
+                [void]$builder.Append($node.InnerText)
             }
         }
+        $text = $builder.ToString().Trim()
+        if ($text) {
+            $paragraphs.Add($text) | Out-Null
+        }
     }
-    return ($runs -join "`n")
+    return ($paragraphs -join "`n")
 }
 
 function Get-OutputDirForKind {
@@ -639,14 +663,6 @@ function Get-UniqueOutputPath {
         $stem = "{0}_{1:D3}_{2:D2}" -f $PptxStem, $SlideNumber, $index
     }
     $candidate = Join-Path $OutputDir "$stem$Suffix"
-
-    if ($Overwrite) {
-        return $candidate
-    }
-
-    if (Test-Path -LiteralPath $candidate) {
-        return $null
-    }
 
     return $candidate
 }
@@ -793,11 +809,10 @@ function Extract-Pptx {
                 $suffix = Get-OutputSuffix $resource.TargetPart
                 $resourceOutputDir = Get-OutputDirForKind $OutputDir $resource.Kind
                 $destination = Get-UniqueOutputPath $resourceOutputDir $PptxStem $resource.SlideNumber $suffix $counters $Overwrite
-                if ($null -eq $destination) {
-                    continue
+                if ($Overwrite -or -not (Test-Path -LiteralPath $destination)) {
+                    Copy-ZipEntry $zip $resource.TargetPart $destination $Overwrite
+                    $extractedCount++
                 }
-                Copy-ZipEntry $zip $resource.TargetPart $destination $Overwrite
-                $extractedCount++
 
                 $manifestRows.Add([PSCustomObject]@{
                     Slide = "{0:D3}" -f $resource.SlideNumber
@@ -815,7 +830,7 @@ function Extract-Pptx {
                 if ($slideText) {
                     $textOutputDir = Get-OutputDirForKind $OutputDir "text"
                     $textPath = Get-UniqueOutputPath $textOutputDir $PptxStem $slideNumber ".txt" $counters $Overwrite
-                    if ($null -ne $textPath) {
+                    if ($Overwrite -or -not (Test-Path -LiteralPath $textPath)) {
                         $parent = Split-Path -Parent $textPath
                         if (-not (Test-Path -LiteralPath $parent)) {
                             New-Item -ItemType Directory -Path $parent -Force | Out-Null
@@ -823,17 +838,16 @@ function Extract-Pptx {
                         $utf8NoBom = New-Object System.Text.UTF8Encoding $false
                         [System.IO.File]::WriteAllText($textPath, ($slideText + "`n"), $utf8NoBom)
                         $extractedCount++
-
-                        $manifestRows.Add([PSCustomObject]@{
-                            Slide = "{0:D3}" -f $slideNumber
-                            OutputFile = Get-RelativePathText $textPath $OutputDir
-                            Kind = "text"
-                            SourcePart = $slidePart
-                            TargetPart = $slidePart
-                            RelationshipId = ""
-                            RelationshipType = ""
-                        }) | Out-Null
                     }
+                    $manifestRows.Add([PSCustomObject]@{
+                        Slide = "{0:D3}" -f $slideNumber
+                        OutputFile = Get-RelativePathText $textPath $OutputDir
+                        Kind = "text"
+                        SourcePart = $slidePart
+                        TargetPart = $slidePart
+                        RelationshipId = ""
+                        RelationshipType = ""
+                    }) | Out-Null
                 }
             }
         }
@@ -954,7 +968,7 @@ PRESENTATION_NS = "http://schemas.openxmlformats.org/presentationml/2006/main"
 OFFICE_RELS_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 DRAWING_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
 
-VERSION = "1.2.1"
+VERSION = "1.2.2"
 DEFAULT_OUTPUT_DIR_NAME = "pptx_extracted_elements"
 
 IMAGE_EXTS = {
@@ -1022,10 +1036,13 @@ REL_SKIP_WORDS = (
     "/notesSlide",
     "/presProps",
     "/printerSettings",
-    "/slideLayout",
-    "/slideMaster",
     "/theme",
     "/viewProps",
+)
+
+REL_FOLLOW_WORDS = (
+    "/slideLayout",
+    "/slideMaster",
 )
 
 KIND_FOLDER_NAMES = {
@@ -1258,6 +1275,11 @@ def classify_part(rel_type: str, part: str) -> str | None:
     return None
 
 
+def should_follow_relationship(rel_type: str) -> bool:
+    lower_rel_type = rel_type.lower()
+    return any(word.lower() in lower_rel_type for word in REL_FOLLOW_WORDS)
+
+
 def should_extract(kind: str, media_only: bool) -> bool:
     if media_only:
         return kind in {"image", "video", "audio"}
@@ -1284,10 +1306,12 @@ def collect_slide_resources(
     names = set(zip_file.namelist())
     resources: list[Resource] = []
     seen_targets: set[str] = set()
+    visited_sources: set[str] = set()
 
     def walk_relationships(source_part: str, depth: int) -> None:
-        if depth > 2:
+        if depth > 5 or source_part in visited_sources:
             return
+        visited_sources.add(source_part)
 
         for rel in parse_rels(zip_file, source_part).values():
             if not rel.target or rel.target_mode.lower() == "external":
@@ -1313,6 +1337,8 @@ def collect_slide_resources(
 
             if kind in {"chart", "diagram"} and not media_only:
                 walk_relationships(target_part, depth + 1)
+            elif should_follow_relationship(rel.rel_type):
+                walk_relationships(target_part, depth + 1)
 
     walk_relationships(slide_part, 0)
     return resources
@@ -1323,14 +1349,15 @@ def extract_slide_text(zip_file: zipfile.ZipFile, slide_part: str) -> str:
     if root is None:
         return ""
 
-    text_runs: list[str] = []
-    for item in root.iter(f"{{{DRAWING_NS}}}t"):
-        if item.text:
-            text = item.text.strip()
-            if text:
-                text_runs.append(text)
+    paragraphs: list[str] = []
+    for paragraph in root.iter(f"{{{DRAWING_NS}}}p"):
+        text = "".join(
+            item.text or "" for item in paragraph.iter(f"{{{DRAWING_NS}}}t")
+        ).strip()
+        if text:
+            paragraphs.append(text)
 
-    return "\n".join(text_runs)
+    return "\n".join(paragraphs)
 
 
 def unique_output_path(
@@ -1341,18 +1368,12 @@ def unique_output_path(
     counters: dict[tuple[Path, int], int],
     *,
     overwrite: bool,
-) -> Path | None:
+) -> Path:
     key = (output_dir, slide_number)
     counters[key] = counters.get(key, 0) + 1
     index = counters[key]
     stem = f"{pptx_stem}_{slide_number:03d}" if index == 1 else f"{pptx_stem}_{slide_number:03d}_{index:02d}"
     candidate = output_dir / f"{stem}{suffix}"
-
-    if overwrite:
-        return candidate
-
-    if candidate.exists():
-        return None
 
     return candidate
 
@@ -1454,15 +1475,14 @@ def extract_pptx(
                     counters,
                     overwrite=overwrite,
                 )
-                if destination is None:
-                    continue
-                extract_file(
-                    pptx_zip,
-                    resource.target_part,
-                    destination,
-                    overwrite=overwrite,
-                )
-                extracted_count += 1
+                if overwrite or not destination.exists():
+                    extract_file(
+                        pptx_zip,
+                        resource.target_part,
+                        destination,
+                        overwrite=overwrite,
+                    )
+                    extracted_count += 1
                 manifest_rows.append(
                     {
                         "slide": f"{resource.slide_number:03d}",
@@ -1486,21 +1506,21 @@ def extract_pptx(
                         counters,
                         overwrite=overwrite,
                     )
-                    if text_path is not None:
+                    if overwrite or not text_path.exists():
                         text_path.parent.mkdir(parents=True, exist_ok=True)
                         text_path.write_text(slide_text + "\n", encoding="utf-8")
                         extracted_count += 1
-                        manifest_rows.append(
-                            {
-                                "slide": f"{slide_number:03d}",
-                                "output_file": relative_output_file(text_path, output_dir),
-                                "kind": "text",
-                                "source_part": slide_part,
-                                "target_part": slide_part,
-                                "relationship_id": "",
-                                "relationship_type": "",
-                            }
-                        )
+                    manifest_rows.append(
+                        {
+                            "slide": f"{slide_number:03d}",
+                            "output_file": relative_output_file(text_path, output_dir),
+                            "kind": "text",
+                            "source_part": slide_part,
+                            "target_part": slide_part,
+                            "relationship_id": "",
+                            "relationship_type": "",
+                        }
+                    )
 
     write_manifest(output_dir / "manifest.csv", manifest_rows)
     return len(slide_parts), extracted_count

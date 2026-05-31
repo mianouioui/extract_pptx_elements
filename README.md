@@ -224,7 +224,7 @@ python3 restore_pptx_elements.py --dry-run
 | `--overwrite` | 覆盖已存在的输出文件 |
 | `--dry-run` | 预演，不写文件 |
 
-还原工具只替换内容有改动的部件：与原文件一致的素材会自动跳过；多页共用的同一张图片，只要改其中一份即可。
+还原工具只替换内容有改动的部件：与原文件一致的素材会自动跳过；多页共用的同一张图片，只要改其中一份即可。如果同一部件的多份副本被改成不同内容，还原会停止并提示冲突。
 
 ### 发布记录
 
@@ -458,7 +458,7 @@ python3 restore_pptx_elements.py --dry-run
 | `--overwrite` | Overwrite an existing output file |
 | `--dry-run` | Preview without writing |
 
-The restorer only swaps parts whose content actually changed: assets identical to the original are skipped, and for an image shared by several slides, editing any one copy is enough.
+The restorer only swaps parts whose content actually changed: assets identical to the original are skipped, and for an image shared by several slides, editing any one copy is enough. If several copies of the same part are edited differently, restore stops and reports the conflict.
 
 ### Release Notes
 
@@ -692,7 +692,7 @@ python3 restore_pptx_elements.py --dry-run
 | `--overwrite` | Écraser un fichier de sortie existant |
 | `--dry-run` | Aperçu sans écriture |
 
-Le restaurateur ne remplace que les parties dont le contenu a réellement changé : les médias identiques à l’original sont ignorés, et pour une image partagée par plusieurs diapositives, il suffit d’en modifier une seule copie.
+Le restaurateur ne remplace que les parties dont le contenu a réellement changé : les médias identiques à l’original sont ignorés, et pour une image partagée par plusieurs diapositives, il suffit d’en modifier une seule copie. Si plusieurs copies de la même partie sont modifiées différemment, la restauration s’arrête et signale le conflit.
 
 ### Notes de version
 

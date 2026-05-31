@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-#  PPTX 元素还原器 V1.2.1 - macOS 单文件启动器
+#  PPTX 元素还原器 V1.2.2 - macOS 单文件启动器
 #  双击即可运行，兼容 Intel 和 Apple Silicon Mac
 #  用法：把本文件放在“原始 PPTX”和“pptx_extracted_elements”
 #        文件夹旁边，双击即可一键把修好的图片写回 PPTX。
@@ -10,7 +10,7 @@
 chmod +x "$0" >/dev/null 2>&1 || true
 xattr -d com.apple.quarantine "$0" >/dev/null 2>&1 || true
 
-VERSION="V1.2.1"
+VERSION="V1.2.2"
 LAUNCHER_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$LAUNCHER_DIR" || exit 1
 
@@ -129,7 +129,7 @@ from pathlib import Path, PurePosixPath
 from typing import Iterable
 
 
-VERSION = "1.2.1"
+VERSION = "1.2.2"
 
 MANIFEST_NAME = "manifest.csv"
 DEFAULT_EXTRACT_DIR_NAME = "pptx_extracted_elements"
@@ -559,7 +559,7 @@ def print_report(
     for target, first, second in plan.conflicts:
         print(
             f"  ⚠ 同一部件 {target} 有多个不同的修改版本："
-            f"{first.name} / {second.name}，采用第一个。",
+            f"{first.name} / {second.name}。",
             file=sys.stderr,
         )
 
@@ -568,6 +568,19 @@ def print_report(
     else:
         print(f"完成 ✅  已生成：{output_path}")
         print(f"原始文件未改动：{source_pptx}")
+
+
+def print_conflict_errors(plan: RestorePlan) -> None:
+    print(
+        "检测到同一 PPTX 部件有多个不同的修改版本，已停止还原。\n"
+        "请只保留一个修改版本，或让这些副本内容一致后再运行。",
+        file=sys.stderr,
+    )
+    for target, first, second in plan.conflicts:
+        print(
+            f"  - {target}: {first} / {second}",
+            file=sys.stderr,
+        )
 
 
 def restore(
@@ -627,6 +640,9 @@ def restore(
             "很可能不是同一个文件。请用 --pptx 指定正确的原始 PPTX。",
             file=sys.stderr,
         )
+        return 1
+    if plan.conflicts:
+        print_conflict_errors(plan)
         return 1
 
     if not dry_run:

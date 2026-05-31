@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions
-set "VERSION=V1.2.1"
+set "VERSION=V1.2.2"
 set "RESTORE_SCRIPT=%~f0"
 set "RESTORE_PY_TEMP=%TEMP%\restore_pptx_elements_py_%RANDOM%%RANDOM%.py"
 set "RESTORE_PS_TEMP=%TEMP%\restore_pptx_elements_ps_%RANDOM%%RANDOM%.ps1"
@@ -137,7 +137,7 @@ param([string[]]$LauncherArgs)
 
 $ErrorActionPreference = "Stop"
 
-$Version = "V1.2.1"
+$Version = "V1.2.2"
 $ManifestName = "manifest.csv"
 $DefaultExtractDirName = "pptx_extracted_elements"
 $DefaultOutputSuffix = "_restored"
@@ -527,7 +527,7 @@ function Write-Report {
     foreach ($conflict in $Plan.Conflicts) {
         $first = [System.IO.Path]::GetFileName($conflict.First)
         $second = [System.IO.Path]::GetFileName($conflict.Second)
-        Write-Host "  ⚠ 同一部件 $($conflict.Target) 有多个不同的修改版本：$first / $second，采用第一个。"
+        Write-Host "  ⚠ 同一部件 $($conflict.Target) 有多个不同的修改版本：$first / $second。"
     }
 
     if ($DryRun) {
@@ -536,6 +536,16 @@ function Write-Report {
     else {
         Write-Host "完成 ✅  已生成：$OutputPath"
         Write-Host "原始文件未改动：$SourcePptx"
+    }
+}
+
+function Write-ConflictErrors {
+    param([object]$Plan)
+
+    Write-Host "检测到同一 PPTX 部件有多个不同的修改版本，已停止还原。"
+    Write-Host "请只保留一个修改版本，或让这些副本内容一致后再运行。"
+    foreach ($conflict in $Plan.Conflicts) {
+        Write-Host "  - $($conflict.Target): $($conflict.First) / $($conflict.Second)"
     }
 }
 
@@ -593,6 +603,10 @@ function Invoke-Restore {
     }
     if ($plan.PresentTargets -eq 0) {
         Write-Host "这些素材（$($plan.MissingInZip.Count) 个）在该 PPTX 中都不存在，很可能不是同一个文件。请用 --pptx 指定正确的原始 PPTX。"
+        return 1
+    }
+    if ($plan.Conflicts.Count -gt 0) {
+        Write-ConflictErrors $plan
         return 1
     }
 
@@ -654,7 +668,7 @@ from pathlib import Path, PurePosixPath
 from typing import Iterable
 
 
-VERSION = "1.2.1"
+VERSION = "1.2.2"
 
 MANIFEST_NAME = "manifest.csv"
 DEFAULT_EXTRACT_DIR_NAME = "pptx_extracted_elements"
@@ -1084,7 +1098,7 @@ def print_report(
     for target, first, second in plan.conflicts:
         print(
             f"  ⚠ 同一部件 {target} 有多个不同的修改版本："
-            f"{first.name} / {second.name}，采用第一个。",
+            f"{first.name} / {second.name}。",
             file=sys.stderr,
         )
 
@@ -1093,6 +1107,19 @@ def print_report(
     else:
         print(f"完成 ✅  已生成：{output_path}")
         print(f"原始文件未改动：{source_pptx}")
+
+
+def print_conflict_errors(plan: RestorePlan) -> None:
+    print(
+        "检测到同一 PPTX 部件有多个不同的修改版本，已停止还原。\n"
+        "请只保留一个修改版本，或让这些副本内容一致后再运行。",
+        file=sys.stderr,
+    )
+    for target, first, second in plan.conflicts:
+        print(
+            f"  - {target}: {first} / {second}",
+            file=sys.stderr,
+        )
 
 
 def restore(
@@ -1152,6 +1179,9 @@ def restore(
             "很可能不是同一个文件。请用 --pptx 指定正确的原始 PPTX。",
             file=sys.stderr,
         )
+        return 1
+    if plan.conflicts:
+        print_conflict_errors(plan)
         return 1
 
     if not dry_run:

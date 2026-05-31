@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2026-05-31
+
+### Fixed
+
+- Fixed re-running extraction without `--overwrite` from clearing `manifest.csv`; existing assets are still protected, while the manifest is rebuilt with the expected mappings.
+- Included resources referenced through slide layouts and slide masters, so layout/master images such as logos and backgrounds are no longer missed.
+- Exported slide text by paragraph instead of by individual text run, avoiding unwanted line breaks when PowerPoint splits styled text into multiple runs.
+- Changed restore conflict handling so multiple different edits of the same shared PPTX part stop the restore instead of silently choosing the first copy.
+
 ## [1.2.1] - 2026-05-31
 
 ### Changed
@@ -135,6 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero external dependencies (Python stdlib only)
 - Support for Python 3.8+
 
+[1.2.2]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.2.2
 [1.2.1]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.2.1
 [1.2.0]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.2.0
 [1.1.4]: https://github.com/mianouioui/extract_pptx_elements/releases/tag/V1.1.4
